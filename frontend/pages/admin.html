@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Fridge Chef — Admin</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ff6b00">
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');</script>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <style>
+    .kpi-grid-5 { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px; }
+    @media(max-width:1100px){ .kpi-grid-5{ grid-template-columns:repeat(3,1fr); } }
+    @media(max-width:700px){ .kpi-grid-5{ grid-template-columns:1fr 1fr; } }
+
+    .admin-search {
+      display:flex; align-items:center; gap:10px; margin-bottom:14px;
+    }
+    .admin-search input {
+      flex:1; padding:9px 14px; border:1.5px solid var(--border);
+      border-radius:var(--radius-sm); background:var(--bg-secondary);
+      color:var(--text-primary); font-family:'DM Sans',sans-serif; font-size:.9rem;
+      outline:none; transition:border-color .2s;
+    }
+    .admin-search input:focus { border-color:var(--accent); }
+
+    /* Modal */
+    .modal-overlay {
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.55); backdrop-filter:blur(4px);
+      z-index:500; align-items:center; justify-content:center;
+    }
+    .modal-overlay.show { display:flex; }
+    .modal-box {
+      background:var(--bg-card); border:1px solid var(--border);
+      border-radius:var(--radius-lg); padding:28px; width:100%;
+      max-width:480px; box-shadow:var(--shadow-lg);
+      animation:cardIn .25s ease;
+    }
+    .modal-box h3 { font-family:'Playfair Display',serif; font-size:1.2rem; margin-bottom:16px; }
+
+    /* Hourly chart */
+    .hourly-grid {
+      display:flex; align-items:flex-end; gap:4px;
+      height:80px; padding:4px 0;
+    }
+    .hourly-bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; }
+    .hourly-bar {
+      width:100%; background:var(--accent); border-radius:4px 4px 0 0;
+      transition:height .6s ease; min-height:2px;
+    }
+    .hourly-label { font-size:.6rem; color:var(--text-muted); }
+
+    /* Action buttons in table */
+    .action-btns { display:flex; gap:6px; flex-wrap:nowrap; }
+
+    /* Tabs */
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    
+    /* Trend Indicators */
+    .kpi-trend { font-size: 0.75rem; margin-top: 4px; font-weight: 600; }
+    .trend-up { color: #22C55E; }
+    .trend-neutral { color: #8B5CF6; }
+    .trend-down { color: #EF4444; }
+    
+    /* Status Badge */
+    .status-badge { padding: 4px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+    .status-active { background: rgba(34,197,94,0.15); color: #22C55E; }
+    .status-banned { background: rgba(239,68,68,0.15); color: #EF4444; }
+  </style>
+</head>
+<body>
+
+<!-- Custom Logout Modal -->
+<div id="logoutModal" class="logout-overlay" style="display:none;">
+  <div class="logout-content card">
+    <div style="font-size: 3rem; margin-bottom: 16px;">🚪</div>
+    <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 8px;">Ready to leave?</h3>
+    <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">Are you sure you want to log out of your admin session?</p>
+    <div style="display: flex; gap: 12px; width: 100%;">
+      <button class="btn btn-secondary" style="flex: 1;" onclick="closeLogoutModal()">Cancel</button>
+      <button class="btn btn-danger" style="flex: 1;" onclick="handleLogout()">Yes, Log Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER HISTORY MODAL -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3 id="historyModalTitle">User Meal History</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('historyModal')">✕</button>
+    </div>
+    <div id="historyModalBody"></div>
+  </div>
+</div>
+
+<!-- RESET PASSWORD MODAL -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3>Reset Password</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('resetModal')">✕</button>
+    </div>
+    <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">Set a new password for <strong id="resetUsername"></strong></p>
+    <div class="form-group">
+      <label class="form-label">New Password</label>
+      <input type="text" class="form-input" id="resetPasswordInput" placeholder="Enter new password" />
+    </div>
+    <div id="resetAlert" style="margin-bottom:10px;"></div>
+    <button class="btn btn-primary" onclick="confirmResetPassword()" id="resetConfirmBtn">🔑 Reset Password</button>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <h3 style="color:var(--danger);">⚠️ Delete User</h3>
+    <p style="font-size:.9rem;color:var(--text-secondary);margin:14px 0;">
+      Are you sure you want to delete <strong id="deleteUsername"></strong>?<br/>
+      This will permanently remove all their meals, recipes and shopping list.
+    </p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDeleteUser()" id="deleteConfirmBtn">🗑️ Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <h1>The Fridge<span>Chef</span></h1>
+      <p style="color:#ffffff;">System Administration</p>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar" style="background:#E8A838;">A</div>
+      <div class="user-info"><p style="color:#ffffff;">Admin</p><span style="color:#ffffff;">Administrator</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Admin Panel</div>
+      <button class="nav-item active" onclick="switchTab('analytics',this)"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></span> Dashboard</button>
+      <button class="nav-item" onclick="switchTab('database',this)"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg></span> Database</button>
+      <button class="nav-item" onclick="switchTab('system',this)"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span> System</button>
+      <div class="nav-section-label" style="margin-top:12px;">Account</div>
+      <button class="nav-item nav-logout" onclick="showLogoutModal()"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></span> Logout</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div style="font-size:.72rem;color:#ffffff;text-align:center;">
+        System: <strong style="color:#22C55E;">● Healthy</strong>
+        &nbsp;|&nbsp;
+        <span id="lastRefresh" style="color:#ffffff;"></span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="btn btn-ghost btn-sm" id="mobileMenuBtn"
+          style="display:none;font-size:1.2rem;padding:4px 10px;"
+          onclick="openSidebar()">☰</button>
+        <div class="topbar-title">⚙️ System Administrator Dashboard</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-ghost btn-sm" onclick="loadStats()">🔄 Refresh</button>
+        <a href="/api/admin/export/users" class="btn btn-ghost btn-sm" download>📥 Export CSV</a>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+      </div>
+    </div>
+
+    <div class="page-content">
+
+      <!-- DASHBOARD TAB -->
+      <div id="tab-analytics" class="tab-panel active">
+        <!-- KPI CARDS (5) -->
+        <div class="kpi-grid-5">
+        <div class="kpi-card">
+          <div class="kpi-label">Registered Users</div>
+          <div class="kpi-value" id="kpiUsers">--</div>
+          <div class="kpi-trend trend-up">↑ 12% this month</div>
+          <div class="kpi-icon"></div>
+        </div>
+        <div class="kpi-card" style="--accent:#E8A838;">
+          <div class="kpi-label">Total Meals Generated</div>
+          <div class="kpi-value" id="kpiMeals">--</div>
+          <div class="kpi-trend trend-up">↑ 24% this week</div>
+          <div class="kpi-icon"></div>
+        </div>
+        <div class="kpi-card" style="--accent:#8B5CF6;">
+          <div class="kpi-label">Meals Today</div>
+          <div class="kpi-value" id="kpiMealsToday">--</div>
+          <div class="kpi-trend trend-neutral">→ Steady</div>
+          <div class="kpi-icon"></div>
+        </div>
+        <div class="kpi-card" style="--accent:#16A34A;">
+          <div class="kpi-label">Total Cost Logged (RM)</div>
+          <div class="kpi-value" id="kpiSavings">--</div>
+          <div class="kpi-trend trend-up">↑ 8% from last week</div>
+          <div class="kpi-icon"></div>
+        </div>
+        <div class="kpi-card" style="--accent:#22C55E;">
+          <div class="kpi-label">System Status</div>
+          <div class="kpi-value" style="font-size:1.2rem;color:#22C55E;">Healthy</div>
+          <div class="kpi-icon"></div>
+        </div>
+      </div>
+
+      <!-- CHARTS ROW -->
+      <div class="grid-2" style="margin-bottom:24px;">
+        <div class="card">
+          <div class="card-header"><div class="card-title">User Health Demographics</div></div>
+          <div class="chart-bar-container" id="healthChart">
+            <div class="empty-state" style="padding:20px 0;"><p>Loading...</p></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Top Generated Recipes</div></div>
+          <div class="chart-bar-container" id="recipeChart">
+            <div class="empty-state" style="padding:20px 0;"><p>Loading...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PEAK USAGE CHART -->
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-header">
+          <div class="card-title">Peak Usage Hours (All Time)</div>
+          <span style="font-size:.78rem;color:var(--text-muted);">Meals generated per hour</span>
+        </div>
+        <div id="hourlyChart">
+          <div class="empty-state" style="padding:10px 0;width:100%;"><p>No data yet.</p></div>
+        </div>
+      </div>
+
+      <!-- USER DIRECTORY -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">User Directory</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span id="userCountBadge" class="tag">0 users</span>
+          </div>
+        </div>
+
+        <!-- SEARCH BAR -->
+        <div class="admin-search">
+          <input type="text" id="userSearchInput" placeholder="Search by username, phone, goal..." oninput="filterUsers()" />
+          <select class="form-select" id="genderFilter" onchange="filterUsers()" style="width:120px;">
+            <option value="">All Genders</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+          <select class="form-select" id="goalFilter" onchange="filterUsers()" style="width:160px;">
+            <option value="">All Goals</option>
+            <option value="Maintain">Maintain</option>
+            <option value="Deficit">Weight Loss</option>
+            <option value="Surplus">Weight Gain</option>
+          </select>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th><th>Username</th><th>Phone</th><th>Age</th>
+                <th>Gender</th><th>Height</th><th>Weight</th><th>BMI</th>
+                <th>Goal</th><th>Activity</th><th>Allergies</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <tr><td colspan="12" style="text-align:center;color:var(--text-muted);padding:24px;">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      </div>
+      <!-- END DASHBOARD TAB -->
+
+      <!-- DATABASE TAB -->
+      <div id="tab-database" class="tab-panel">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Ingredient Database & Pricing</div>
+            <button class="btn btn-primary btn-sm" style="width:auto;" onclick="loadDatabasePrices()">Refresh Prices</button>
+          </div>
+          <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:16px;">Live OpenDOSM median retail prices used by the decision engine for meal generation.</p>
+          
+          <!-- SEARCH BAR -->
+          <div class="admin-search" style="margin-bottom:16px;">
+            <input type="text" id="dbSearchInput" placeholder="Search by ingredient name, category..." oninput="filterDatabase()" />
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th>Category</th>
+                  <th>Current Median Price (RM)</th>
+                  <th>Unit</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="databaseTableBody">
+                <tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;">Loading database...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div> <!-- END DATABASE TAB -->
+
+      <!-- SYSTEM TAB -->
+      <div id="tab-system" class="tab-panel">
+        <div class="card" style="text-align:center; padding: 40px 20px;">
+          <h2 style="color:var(--text-primary); margin-bottom:10px;">⚙️ System Settings</h2>
+          <p style="color:var(--text-muted);">System configuration and logs will be available here soon.</p>
+        </div>
+      </div> <!-- END SYSTEM TAB -->
+
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/auth.js"></script>
+<script src="/static/js/admin.js"></script>
+<script>
+  const user = JSON.parse(sessionStorage.getItem('user') || 'null');
+  if (!user || !user.is_admin) window.location.href = '/';
+
+  // Theme
+  const themeBtn = document.getElementById('themeToggle');
+  themeBtn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  themeBtn.onclick = () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+  };
+
+  // Mobile sidebar
+  function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sidebarOverlay').classList.add('show');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+  }
+
+  function showLogoutModal() { document.getElementById('logoutModal').style.display = 'flex'; }
+  function closeLogoutModal() { document.getElementById('logoutModal').style.display = 'none'; }
+  function handleLogout(){
+    sessionStorage.clear();
+    window.location.href='/';
+  }
+  function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+  function switchTab(tabName, el) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar .nav-item').forEach(b => b.classList.remove('active'));
+    
+    const target = document.getElementById('tab-' + tabName);
+    if (target) {
+      target.classList.add('active');
+    }
+    
+    if(el) el.classList.add('active');
+    
+    if (tabName === 'database') {
+      loadDatabasePrices();
+    }
+  }
+
+  // Auto-refresh every 30 seconds
+  loadStats();
+  setInterval(loadStats, 30000);
+
+  // PWA: Register Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('Service Worker registered!', reg))
+        .catch(err => console.error('Service Worker registration failed: ', err));
+    });
+  }
+</script>
+</body>
+</html>

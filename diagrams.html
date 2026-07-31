@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FYP Diagrams (White Background)</title>
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+            font-family: Arial, sans-serif;
+            padding: 40px;
+        }
+        h2 {
+            margin-top: 50px;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .diagram-container {
+            margin-bottom: 50px;
+            padding: 20px;
+            border: 1px dashed #eee;
+            background-color: #ffffff;
+        }
+    </style>
+    <!-- Load Mermaid -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'base',
+            themeVariables: {
+                primaryColor: '#ffffff',
+                primaryTextColor: '#000000',
+                primaryBorderColor: '#000000',
+                lineColor: '#000000',
+                secondaryColor: '#ffffff',
+                tertiaryColor: '#ffffff',
+                mainBkg: '#ffffff',
+                nodeBorder: '#000000',
+                clusterBkg: '#ffffff',
+                clusterBorder: '#000000',
+                actorBkg: '#ffffff',
+                actorBorder: '#000000',
+                actorTextColor: '#000000'
+            }
+        });
+    </script>
+</head>
+<body>
+
+    <h1>FYP Report Diagrams</h1>
+    <p>Take screenshots of these diagrams for your report. They are forced onto a white background so they look perfect in Microsoft Word.</p>
+
+    <h2>1. Activity Diagram of Traditional Workflow (Chapter 3)</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+        flowchart TD
+            START[START] --> OpenFridge[Feels Hungry]
+            OpenFridge --> CheckIngredients[Inspect available pantry items]
+            CheckIngredients --> SearchGoogle[Manually search Google/Blogs for recipes]
+            SearchGoogle --> CheckWallet[Check available daily budget]
+            CheckWallet --> GoToStore[Purchase missing ingredients]
+            GoToStore --> CookMeal[Prepare and cook food]
+            CookMeal --> END[END]
+        </div>
+    </div>
+
+    <h2>2. Use Case Diagram (Chapter 3)</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+        flowchart LR
+            User((User))
+            
+            subgraph The Fridge Chef System
+                direction TB
+                UC1([Login & Register])
+                UC2([Set Budget & Preferences])
+                UC3([Capture/Upload Pantry Image])
+                UC4([Detect Ingredients])
+                UC5([Generate AI Recipe])
+                UC6([Track Budget & Calories])
+            end
+            
+            DOSM((OpenDOSM API))
+            Groq((Groq LLaMA-3 API))
+            CNN((CNN Model))
+            
+            User --- UC1
+            User --- UC2
+            User --- UC3
+            User --- UC6
+            
+            UC3 -.->|includes| UC4
+            UC4 --- CNN
+            
+            UC4 -.->|includes| UC5
+            UC5 --- Groq
+            UC5 --- DOSM
+            
+        </div>
+    </div>
+
+    <h2>3. Entity-Relationship Diagram (ERD) (Chapter 4)</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+        erDiagram
+            History }o--|| Users : "logged by"
+            Users ||--o{ SavedRecipes : "saves"
+            Users ||--o{ ShoppingList : "tracks items"
+
+            Users {
+                int id PK
+                string username
+                string password
+                string phone_number
+                int age
+                string gender
+                float height
+                float weight
+                string activity_level
+                float bmi
+                string health_goal
+                string allergies
+            }
+
+            History {
+                int log_id PK
+                int user_id FK
+                string recipe_name
+                int calories
+                int protein
+                int carbs
+                int fat
+                float cost_rm
+                datetime timestamp
+            }
+
+            SavedRecipes {
+                int id PK
+                string username FK
+                string recipe_name
+                string ingredients
+                string instructions
+            }
+
+            ShoppingList {
+                int id PK
+                string username FK
+                string recipe_name
+                string item_name
+            }
+        </div>
+    </div>
+
+    <h2>4. System Sequence Diagram (Chapter 4)</h2>
+    <div class="diagram-container">
+        <div class="mermaid">
+        sequenceDiagram
+            autonumber
+            actor User
+            participant PWA as Frontend (PWA)
+            participant API as Backend (FastAPI)
+            participant CNN as Local CNN (TFLite)
+            participant DOSM as OpenDOSM API
+            participant Groq as Groq (LLaMA-3)
+            participant DB as SQLite Database
+
+            User->>PWA: Captures pantry image
+            PWA->>API: POST /api/scan/cnn (Multipart Form Data)
+            API->>CNN: preprocess_image() & invoke()
+            CNN-->>API: Returns detected ingredients (e.g., Eggs, Tomato)
+            
+            API->>DOSM: Fetch real-time retail prices
+            DOSM-->>API: Returns median RM prices
+            
+            API->>DB: Fetch User Biometrics & Constraints
+            DB-->>API: Returns User Profile
+            
+            API->>Groq: Send highly structured JSON prompt
+            Note over API,Groq: Prompt includes Ingredients, RM Prices, & Constraints
+            Groq-->>API: Returns JSON-formatted step-by-step recipe
+            
+            API-->>PWA: HTTP 200 OK (Recipe JSON)
+            PWA-->>User: Renders Recipe Card with RM Cost & Macros
+        </div>
+    </div>
+
+</body>
+</html>

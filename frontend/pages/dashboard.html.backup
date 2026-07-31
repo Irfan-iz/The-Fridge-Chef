@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Fridge Chef — Dashboard</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ff6b00">
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');</script>
+</head>
+<body>
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <p id="loadingText">Processing...</p>
+</div>
+
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h1>The Fridge<span>Chef</span></h1>
+      <p>AI Culinary Assistant</p>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="userAvatar">U</div>
+      <div class="user-info">
+        <p id="sidebarUsername">User</p>
+        <span id="sidebarGoal">—</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Kitchen</div>
+      <button class="nav-item active" onclick="switchTab('inventory',this)"><span class="nav-icon">🧊</span> My Fridge</button>
+      <button class="nav-item" onclick="switchTab('planner',this)"><span class="nav-icon">🍳</span> Meal Engine</button>
+      <button class="nav-item" onclick="switchTab('cookbook',this)"><span class="nav-icon">📖</span> Cookbook</button>
+      <button class="nav-item" onclick="switchTab('quicklist',this)"><span class="nav-icon">🛒</span> Quick List</button>
+      <div class="nav-section-label" style="margin-top:12px;">Account</div>
+      <button class="nav-item" onclick="switchTab('profile',this)"><span class="nav-icon">👤</span> My Profile</button>
+      <button class="nav-item" onclick="handleLogout()"><span class="nav-icon">🚪</span> Logout</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div style="font-size:.72rem;color:#57534E;text-align:center;">
+        BMI: <strong id="sidebarBmi" style="color:var(--accent);">—</strong> &nbsp;|&nbsp;
+        <span id="sidebarActivity" style="color:#78716C;"></span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div style="display: flex; align-items: center;">
+        <button class="btn btn-ghost btn-sm" id="mobileMenuBtn" style="display:none; font-size:1.4rem; padding:4px 8px; margin-right:12px; border:none;">☰</button>
+        <div class="topbar-title" id="topbarTitle">🧊 My Fridge</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+      </div>
+    </div> 
+    
+    <div class="page-content">
+
+      <div class="tab-panel active" id="tab-inventory">
+        <div class="grid-2" style="align-items:start;">
+          <div>
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-header"><div class="card-title">📷 Add Ingredient</div></div>
+              <div class="vision-mode-selector">
+                <button class="mode-btn active" onclick="setMode('camera',this)">📷 Camera</button>
+                <button class="mode-btn" onclick="setMode('upload',this)">📁 Upload</button>
+                <button class="mode-btn" onclick="setMode('gemini',this)">☁️ Gemini</button>
+                <button class="mode-btn" onclick="setMode('manual',this)">✏️ Manual</button>
+              </div>
+              <div id="mode-camera">
+                <video id="cameraStream" autoplay playsinline style="width:100%;border-radius:var(--radius);max-height:220px;object-fit:cover;display:none;"></video>
+                <canvas id="cameraCanvas" style="display:none;"></canvas>
+                
+                <div class="camera-area" id="cameraStartArea" onclick="startCamera()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 220px; cursor: pointer;">
+                  <div style="font-size: 2.5rem; margin-bottom: 8px; opacity: 0.9;">👁️‍🗨️</div>
+                  <h3 style="margin: 0 0 6px 0; font-size: 1.1rem; color: var(--text-primary);">AI Vision Offline</h3>
+                  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; text-align: center; max-width: 80%; line-height: 1.4;">
+                    Initialize scanner to identify raw ingredients, vegetables, and proteins in real-time.
+                  </p>
+                  <button class="btn btn-primary btn-sm" style="pointer-events: none; border-radius: 20px; padding: 6px 20px;">🚀 Boot System</button>
+                </div>
+
+                <img id="camera-preview" alt="captured" style="width:100%;border-radius:var(--radius);max-height:220px;object-fit:cover;display:none;margin-top:8px;" />
+                <div style="display:flex;gap:8px;margin-top:10px;">
+                  <button class="btn btn-secondary btn-sm" id="captureBtnEl" onclick="capturePhoto()" style="display:none;flex:1;">📸 Capture</button>
+                  <button class="btn btn-primary btn-sm" id="scanCameraBtn" onclick="scanCamera()" style="display:none;flex:1;">🔍 Identify Object</button>
+                </div>
+              </div>
+              <div id="mode-upload" style="display:none;">
+                <div class="camera-area" onclick="document.getElementById('uploadInput').click()">
+                  <div class="camera-icon">📁</div><p>Click to upload ingredient photo</p>
+                </div>
+                <input type="file" id="uploadInput" accept="image/*" style="display:none;" onchange="handleUpload(event)" />
+                <img id="upload-preview" alt="preview" style="width:100%;border-radius:var(--radius);max-height:200px;object-fit:cover;display:none;margin-top:10px;" />
+                <button class="btn btn-primary btn-sm" id="scanUploadBtn" onclick="scanUpload()" style="display:none;margin-top:10px;width:100%;">🔍 Identify (CNN)</button>
+              </div>
+              <div id="mode-gemini" style="display:none;">
+                <div class="camera-area" onclick="document.getElementById('geminiInput').click()">
+                  <div class="camera-icon">☁️</div>
+                  <p>Upload fridge photo or grocery receipt</p>
+                  <p style="font-size:.75rem;margin-top:4px;">Gemini detects <strong>all</strong> items at once</p>
+                </div>
+                <input type="file" id="geminiInput" accept="image/*" style="display:none;" onchange="handleGeminiPreview(event)" />
+                <img id="gemini-preview" alt="preview" style="width:100%;border-radius:var(--radius);max-height:200px;object-fit:cover;display:none;margin-top:10px;" />
+                <button class="btn btn-primary btn-sm" id="scanGeminiBtn" onclick="scanGemini()" style="display:none;margin-top:10px;width:100%;">🧠 Scan with Gemini AI</button>
+              </div>
+              <div id="mode-manual" style="display:none;">
+                <div class="form-group">
+                  <label class="form-label">Type ingredient name</label>
+                  <input type="text" class="form-input" id="manualInput" placeholder="e.g. Carrot" />
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="addManual()" style="width:100%;">➕ Add to Fridge</button>
+              </div>
+              <div id="scanResult" style="margin-top:12px;"></div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">🧊 My Fridge (<span id="fridgeCount">0</span>)</div>
+                <button class="btn btn-ghost btn-sm" onclick="clearFridge()">🗑 Clear</button>
+              </div>
+              <div id="fridgeList">
+                <div class="empty-state"><div class="empty-icon">🧊</div><p>Your fridge is empty.</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-planner">
+        <div class="grid-2">
+          
+          <div class="constraints-panel">
+            <div class="constraint-card">
+              <div class="constraint-header">💰 Resources (Economy & Time)</div>
+              
+              <div class="constraint-group">
+                <span class="constraint-label">Budget Range (RM)</span>
+                <div class="range-wrapper">
+                  <input type="number" class="form-input" id="minBudget" value="5" min="1" max="50">
+                  <span class="text-muted">—</span>
+                  <input type="number" class="form-input" id="maxBudget" value="15" min="5" max="100">
+                </div>
+              </div>
+
+              <div class="constraint-group" style="margin-bottom:0;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <span class="constraint-label" style="margin-bottom:0;">Max Prep Time</span>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <span id="prepTimeVal" style="font-weight:700; font-size:0.9rem; color:var(--accent);">30 mins</span>
+                    <label class="toggle" style="transform:scale(0.85);">
+                      <input type="checkbox" id="prepTimeToggle" checked onchange="togglePrepTime()">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+                <div id="prepTimeWrap">
+                  <input type="range" id="maxPrepTime" min="10" max="120" step="5" value="30" 
+                        style="width:100%; cursor:pointer; accent-color:var(--accent);" 
+                        oninput="document.getElementById('prepTimeVal').textContent = this.value + ' mins'" />
+                </div>
+              </div>
+            </div>
+
+            <div class="constraint-card">
+              <div class="constraint-header">⚖️ Dietary Controls</div>
+              
+              <div class="constraint-group">
+                <div class="toggle-group">
+                  <span class="toggle-label" style="font-weight:600; font-size:0.85rem;">Enforce Halal</span>
+                  <label class="toggle">
+                    <input type="checkbox" id="halalToggle" checked>
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="constraint-group">
+                <div class="toggle-group" style="margin-bottom:10px;">
+                  <span class="toggle-label" style="font-weight:600; font-size:0.85rem;">Enable Caloric Threshold</span>
+                  <label class="toggle">
+                    <input type="checkbox" id="calToggle" onchange="document.getElementById('calWrap').style.display=this.checked?'flex':'none'">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+                <div class="range-wrapper" id="calWrap" style="display:none;">
+                  <input type="number" class="form-input" id="minCal" value="300" step="50">
+                  <span class="text-muted">—</span>
+                  <input type="number" class="form-input" id="maxCal" value="800" step="50">
+                  <span class="text-muted" style="font-size:0.8rem;">kcal</span>
+                </div>
+              </div>
+
+              <div class="constraint-group">
+                <div class="toggle-group">
+                  <div>
+                    <span class="toggle-label" style="font-weight:600; font-size:0.85rem;">🔒 Strict Fridge Mode</span>
+                    <p style="font-size:.72rem; color:var(--text-muted); margin-top:2px;">Only use ingredients currently in your fridge</p>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="strictFridgeToggle">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="constraint-group" style="margin-bottom:0;">
+                <div class="toggle-group">
+                  <div>
+                    <span class="toggle-label" style="font-weight:600; font-size:0.85rem;">🏃 Health Optimization</span>
+                    <p style="font-size:.72rem; color:var(--text-muted); margin-top:2px;">Apply your BMI & goal to recipe selection</p>
+                  </div>
+                  <label class="toggle">
+                    <input type="checkbox" id="healthModeToggle" checked onchange="updateHealthBadge()">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="constraint-card">
+              <div class="constraint-header">🌶️ Flavor & Meal Profile</div>
+              
+              <div class="constraint-group">
+                <span class="constraint-label">Meal Category</span>
+                <select class="form-select" id="mealTypeSelect">
+                  <option>Any Meal</option>
+                  <option>Breakfast</option>
+                  <option>Lunch</option>
+                  <option>Dinner</option>
+                  <option>Snack / Light Bite</option>
+                </select>
+              </div>
+
+              <div class="constraint-group">
+                <span class="constraint-label">Cuisine Filter</span>
+                <select class="form-select" id="cuisineSelect" onchange="document.getElementById('stateWrap').style.display=this.value==='Local (Malaysian)'?'block':'none'">
+                  <option>Local (Malaysian)</option>
+                  <option>Asian</option>
+                  <option>Western</option>
+                  <option>Middle Eastern</option>
+                  <option>Fusion / Any</option>
+                </select>
+              </div>
+
+              <div class="constraint-group" id="stateWrap" style="margin-bottom:0;">
+                <span class="constraint-label">State-Specific Origin</span>
+                <select class="form-select" id="stateSelect">
+                  <option>Any State</option>
+                  <option>Johor</option><option>Kedah</option><option>Kelantan</option>
+                  <option>Melaka</option><option>Negeri Sembilan</option><option>Pahang</option>
+                  <option>Penang</option><option>Perak</option><option>Perlis</option>
+                  <option>Sabah</option><option>Sarawak</option><option>Selangor</option>
+                  <option>Terengganu</option>
+                </select>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" style="margin-top:20px;" onclick="generateRecipeIdeas()" id="generateBtn">🍽️ Initialize Decision Engine</button>
+          </div>
+
+          <div id="recipeArea">
+            <div class="card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:400px; text-align:center; color:var(--text-muted);">
+              <div style="font-size:3rem; margin-bottom:16px;">🍳</div>
+              <p style="font-size:0.95rem; font-weight:600; color:var(--text-primary);">System Ready.</p>
+              <p style="font-size:0.85rem; max-width:250px; margin-top:8px;">Configure your constraints on the left and initialize the AI Engine.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-cookbook">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📖 My Digital Cookbook</div>
+            <button class="btn btn-ghost btn-sm" onclick="loadCookbook()">🔄 Refresh</button>
+          </div>
+          <div id="cookbookList">
+            <div class="empty-state"><div class="empty-icon">📖</div><p>No saved recipes yet.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-quicklist">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🛒 Procurement Quick List</div>
+          </div>
+          <div id="quicklistContent">
+            <div class="empty-state"><div class="empty-icon">🛒</div><p>Your grocery list is empty.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-profile">
+        <div class="grid-2" style="align-items:start;gap:20px;">
+          <div>
+            <!-- BIOMETRICS CARD -->
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-header" style="margin-bottom:14px;">
+                <div class="card-title">🧬 Physical Biometrics</div>
+                <div id="cookingStreak" style="font-size:.8rem;color:var(--accent);font-weight:700;"></div>
+              </div>
+              <div class="grid-2" style="gap:12px;margin-bottom:14px;">
+                <div class="macro-item"><div class="macro-val" id="profHeight">—</div><div class="macro-label">Height (cm)</div></div>
+                <div class="macro-item"><div class="macro-val" id="profWeight">—</div><div class="macro-label">Weight (kg)</div></div>
+                <div class="macro-item">
+                  <div class="macro-val" id="profBmi">—</div>
+                  <div class="macro-label">BMI</div>
+                  <div id="profBmiCategory" style="font-size:.72rem;font-weight:700;margin-top:2px;"></div>
+                </div>
+                <div class="macro-item"><div class="macro-val" id="profAge">—</div><div class="macro-label">Age</div></div>
+              </div>
+              <div style="padding:12px;background:var(--bg-secondary);border-radius:var(--radius-sm);font-size:.85rem;">
+                <div style="margin-bottom:4px;"><strong>Goal:</strong> <span id="profGoal">—</span></div>
+                <div style="margin-bottom:4px;"><strong>Activity:</strong> <span id="profActivity">—</span></div>
+                <div style="margin-bottom:4px;"><strong>Gender:</strong> <span id="profGender">—</span></div>
+                <div><strong>Allergies/Restrictions:</strong> <span id="profAllergies" style="color:var(--danger);">—</span></div>
+              </div>
+            </div>
+            <!-- NUTRITION CARD -->
+            <div class="card" style="margin-bottom:18px;">
+              <div class="card-header" style="margin-bottom:10px;">
+                <div class="card-title">🔥 Today's Nutrition</div>
+                <span id="todayMealCount" style="font-size:.8rem;color:var(--text-muted);"></span>
+              </div>
+              <div id="tdeeDisplay" style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px;padding:8px;background:var(--bg-secondary);border-radius:var(--radius-sm);"></div>
+              <div id="macroProgress"></div>
+              <div id="noMealsToday" style="display:none;text-align:center;padding:12px 0;">
+                <span style="font-size:1.5rem;">🍳</span>
+                <p style="font-size:.82rem;color:var(--text-muted);margin-top:4px;">No meals logged today.<br/>Go cook something!</p>
+              </div>
+            </div>
+            <!-- RECENT ACTIVITY -->
+            <div class="card">
+              <div class="card-title" style="margin-bottom:14px;">📈 Recent Activity</div>
+              <div id="recentMeals"><div class="empty-state" style="padding:16px 0;"><p>No meals logged yet.</p></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-title" style="margin-bottom:16px;">✏️ Edit Profile</div>
+              <div class="form-group">
+                <label class="form-label">WhatsApp Number</label>
+                <input type="text" class="form-input" id="editPhone" placeholder="e.g. 60123456789" />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Age</label>
+                  <input type="number" class="form-input" id="editAge" min="12" max="100" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Gender</label>
+                  <select class="form-select" id="editGender">
+                    <option>Male</option><option>Female</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Height (cm)</label>
+                  <input type="number" class="form-input" id="editHeight" min="100" max="250" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Weight (kg)</label>
+                  <input type="number" class="form-input" id="editWeight" min="30" max="200" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Activity Level</label>
+                <select class="form-select" id="editActivity">
+                  <option>Sedentary (Little to no exercise)</option>
+                  <option>Light (Exercise 1-3 times/week)</option>
+                  <option>Moderate (Exercise 4-5 times/week)</option>
+                  <option>Active (Daily exercise or intense 3-4 times/week)</option>
+                  <option>Very Active (Intense exercise 6-7 times/week)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Health Goal</label>
+                <select class="form-select" id="editGoal">
+                  <option>Maintain Current Weight</option>
+                  <option>Caloric Deficit (Weight Loss)</option>
+                  <option>Caloric Surplus (Weight Gain)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Dietary Restrictions & Allergies</label>
+                <input type="text" class="form-input" id="editAllergies" placeholder="e.g., Peanut allergy, Vegan, None" />
+              </div>
+
+              <button class="btn btn-primary" onclick="saveProfile()" id="saveProfileBtn">💾 Save & Recalibrate</button>
+              <div id="profileAlert" style="margin-top:12px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div> </div> </div> <script src="/static/js/auth.js"></script>
+<script src="/static/js/inventory.js"></script>
+<script src="/static/js/meal_planner.js"></script>
+<script src="/static/js/cookbook.js"></script>
+<script src="/static/js/profile.js"></script>
+<script src="/static/js/quicklist.js"></script>
+
+<script>
+  const user = JSON.parse(sessionStorage.getItem('user')||'null');
+  if (!user) window.location.href='/';
+
+  // Init UI
+  document.getElementById('userAvatar').textContent=(user.username||'U')[0].toUpperCase();
+  document.getElementById('sidebarUsername').textContent=user.username||'User';
+  document.getElementById('sidebarGoal').textContent=user.health_goal||'';
+  document.getElementById('sidebarBmi').textContent=user.bmi||'—';
+  document.getElementById('sidebarActivity').textContent=(user.activity_level||'').split(' ')[0];
+
+  // Theme
+  const saved=localStorage.getItem('theme')||'light';
+  document.documentElement.setAttribute('data-theme',saved);
+  const themeBtn=document.getElementById('themeToggle');
+  themeBtn.textContent=saved==='dark'?'☀️':'🌙';
+  themeBtn.onclick=()=>{
+    const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
+    document.documentElement.setAttribute('data-theme',next);
+    localStorage.setItem('theme',next);
+    themeBtn.textContent=next==='dark'?'☀️':'🌙';
+  };
+
+  const tabTitles={inventory:'🧊 My Fridge',planner:'🍳 Meal Engine',cookbook:'📖 Cookbook',quicklist:'🛒 Quick List',profile:'👤 My Profile'};
+  function switchTab(name,el){
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    el.classList.add('active');
+    document.getElementById('topbarTitle').textContent=tabTitles[name];
+    if(name==='cookbook') loadCookbook();
+    if(name==='quicklist') loadQuickList();
+    if(name==='profile') loadProfile();
+  }
+  function handleLogout(){ sessionStorage.clear(); window.location.href='/'; }
+  function toggleCalories(){
+    document.getElementById('calRangeWrap').style.display=document.getElementById('calToggle').checked?'flex':'none';
+  }
+  function toggleStateSelect(){
+    document.getElementById('stateWrap').style.display=document.getElementById('cuisineSelect').value==='Local (Malaysian)'?'block':'none';
+  }
+
+  // --- RESPONSIVE HAMBURGER NAVIGATION ---
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const sidebar = document.querySelector('.sidebar');
+
+  // Toggle sidebar slide when clicking the ☰ button
+  if (mobileMenuBtn && sidebar) {
+    mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Prevents instant closing
+      sidebar.classList.toggle('open');
+    });
+  }
+
+  // Auto-close sidebar when clicking a navigation link on mobile
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= 900 && sidebar) {
+        sidebar.classList.remove('open');
+      }
+    });
+  });
+
+  // Tap anywhere outside the sidebar to dismiss it smoothly
+  document.addEventListener('click', (e) => {
+    if (window.innerWidth <= 900 && sidebar && sidebar.classList.contains('open')) {
+      if (!sidebar.contains(e.target) && e.target !== mobileMenuBtn) {
+        sidebar.classList.remove('open');
+      }
+    }
+  });
+
+  // Health badge in meal planner
+  function updateHealthBadge() {
+    const hb = document.getElementById('healthBadge');
+    if (!hb) return;
+    const enabled = document.getElementById('healthModeToggle').checked;
+    if (enabled) {
+      hb.style.background = 'var(--accent-soft)';
+      hb.style.borderColor = 'var(--accent)';
+      hb.style.color = 'var(--accent)';
+      hb.textContent = '🏃 Health Mode ON — Goal: ' + (user.health_goal||'—') + ' | BMI: ' + (user.bmi||'—');
+    } else {
+      hb.style.background = 'var(--bg-secondary)';
+      hb.style.borderColor = 'var(--border)';
+      hb.style.color = 'var(--text-muted)';
+      hb.textContent = '😋 Chill Mode — No health optimization applied';
+    }
+  }
+  updateHealthBadge();
+
+  // Prep time toggle
+  function togglePrepTime() {
+    const enabled = document.getElementById('prepTimeToggle').checked;
+    const wrap = document.getElementById('prepTimeWrap');
+    const val = document.getElementById('prepTimeVal');
+    wrap.style.opacity = enabled ? '1' : '0.35';
+    wrap.style.pointerEvents = enabled ? 'auto' : 'none';
+    val.textContent = enabled ? document.getElementById('maxPrepTime').value + ' mins' : 'Any';
+    val.style.color = enabled ? 'var(--accent)' : 'var(--text-muted)';
+  }
+
+  // PWA: Register Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('Service Worker registered!', reg))
+        .catch(err => console.error('Service Worker registration failed: ', err));
+    });
+  }
+</script>
+</body>
+</html>
