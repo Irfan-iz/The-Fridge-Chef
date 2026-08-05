@@ -6,7 +6,7 @@ async function loadCookbook() {
   const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   if (!user.username) return;
   try {
-    const res = await fetch(`/api/recipe/saved/${user.username}`);
+    const res = await authFetch(`/api/recipe/saved/${user.username}`);
     const data = await res.json();
     renderCookbook(data.recipes || []);
   } catch (e) {
@@ -66,7 +66,7 @@ function renderCookbook(recipes) {
 async function deleteRecipe(id) {
   if(!confirm('Delete this recipe?')) return;
   try {
-    await fetch(`/api/recipe/delete/${id}`, { method: 'DELETE' });
+    await authFetch(`/api/recipe/delete/${id}`, { method: 'DELETE' });
     showToast('Recipe deleted', 'success');
     loadCookbook();
   } catch(e) {
@@ -87,7 +87,7 @@ async function addRecipeToQuickList(recipeName, ingsRaw) {
   }
 
   try {
-    const res = await fetch('/api/shopping/add', {
+    const res = await authFetch('/api/shopping/add', {
       method: 'POST', 
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ 

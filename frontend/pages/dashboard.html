@@ -536,7 +536,7 @@
   }
   function showLogoutModal() { document.getElementById('logoutModal').style.display = 'flex'; }
   function closeLogoutModal() { document.getElementById('logoutModal').style.display = 'none'; }
-  function handleLogout(){ sessionStorage.clear(); window.location.href='/'; }
+  function handleLogout(){ clearToken(); sessionStorage.clear(); window.location.href='/'; }
   function toggleCalories(){
     document.getElementById('calRangeWrap').style.display=document.getElementById('calToggle').checked?'flex':'none';
   }

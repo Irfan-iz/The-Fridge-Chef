@@ -1,5 +1,5 @@
 import sqlite3
-import hashlib
+import bcrypt
 
 DB_NAME = "users.db"
 
@@ -58,17 +58,35 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES Users(id)
         )
     ''')
-    # Seed admin
-    admin_pw = hashlib.sha256("Admin@1234".encode()).hexdigest()
-    c.execute("""
-        INSERT OR IGNORE INTO Users (username, password, phone_number, age, gender, height, weight, activity_level, bmi, health_goal)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, ("Admin", admin_pw, "", 30, "Male", 170, 65, "Sedentary (Little to no exercise)", 22.5, "Maintain Current Weight"))
+    # Seed admin — use bcrypt for secure hashing
+    admin_pw = hash_password("Admin@1234")
+    existing = c.execute("SELECT id FROM Users WHERE username=?", ("Admin",)).fetchone()
+    if not existing:
+        c.execute("""
+            INSERT INTO Users (username, password, phone_number, age, gender, height, weight, activity_level, bmi, health_goal)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, ("Admin", admin_pw, "", 30, "Male", 170, 65, "Sedentary (Little to no exercise)", 22.5, "Maintain Current Weight"))
     conn.commit()
     conn.close()
 
 def hash_password(password):
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash a password using bcrypt with automatic salt generation."""
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def verify_password(password, hashed):
+    """Verify a password against its bcrypt hash. Also handles legacy SHA-256 migration."""
+    import hashlib
+    # If the stored hash is a legacy SHA-256 hex digest (64 chars, no $), migrate on login
+    if len(hashed) == 64 and not hashed.startswith("$"):
+        return hashlib.sha256(password.encode()).hexdigest() == hashed
+    return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+
+def migrate_password(username, password):
+    """Re-hash a password with bcrypt after successful legacy SHA-256 login."""
+    conn = get_connection()
+    conn.execute("UPDATE Users SET password=? WHERE username=?", (hash_password(password), username))
+    conn.commit()
+    conn.close()
 
 def add_user(username, password, phone_number, age, gender, height, weight, activity_level, bmi, health_goal, allergies=""):
     conn = get_connection()
@@ -86,10 +104,17 @@ def add_user(username, password, phone_number, age, gender, height, weight, acti
 
 def login_user(username, password):
     conn = get_connection()
-    user = conn.execute('SELECT * FROM Users WHERE username=? AND password=?',
-        (username, hash_password(password))).fetchone()
+    user = conn.execute('SELECT * FROM Users WHERE username=?', (username,)).fetchone()
     conn.close()
-    return dict(user) if user else None
+    if not user:
+        return None
+    user_dict = dict(user)
+    if not verify_password(password, user_dict["password"]):
+        return None
+    # Migrate legacy SHA-256 hash to bcrypt on successful login
+    if len(user_dict["password"]) == 64 and not user_dict["password"].startswith("$"):
+        migrate_password(username, password)
+    return user_dict
 
 def update_user_profile(username, phone_number, age, gender, height, weight, activity_level, bmi, health_goal, allergies):
     conn = get_connection()

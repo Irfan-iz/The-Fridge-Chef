@@ -264,7 +264,8 @@
       
       if(!res.ok) return showAlert(data.detail || 'Login failed.');
       
-      // Save data locally and redirect
+      // Store JWT token and user data
+      setToken(data.access_token);
       sessionStorage.setItem('user', JSON.stringify(data));
       window.location.href = data.is_admin ? '/admin' : '/dashboard';
     } catch(e) { 

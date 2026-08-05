@@ -6,14 +6,21 @@ let allUsers = [];
 let pendingDeleteId = null;
 let pendingResetId  = null;
 
+function escapeHtml(str) {
+  if (typeof str !== 'string') str = String(str);
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
 // =============================================
 // LOAD ALL STATS
 // =============================================
 async function loadStats() {
   try {
     const [statsRes, usersRes] = await Promise.all([
-      fetch('/api/admin/stats'),
-      fetch('/api/admin/users')
+      authFetch('/api/admin/stats'),
+      authFetch('/api/admin/users')
     ]);
     const stats     = await statsRes.json();
     const usersData = await usersRes.json();
@@ -129,21 +136,21 @@ function renderUserTable(users) {
     const statusPill = `<span class="status-badge status-active">Active</span>`;
     return '<tr>' +
       '<td>' + u.id + '</td>' +
-      '<td><strong>' + u.username + '</strong>' + (isAdmin ? ' <span class="tag" style="font-size:.65rem;">Admin</span>' : '') + '</td>' +
-      '<td>' + (u.phone_number || '—') + '</td>' +
+      '<td><strong>' + escapeHtml(u.username) + '</strong>' + (isAdmin ? ' <span class="tag" style="font-size:.65rem;">Admin</span>' : '') + '</td>' +
+      '<td>' + escapeHtml(u.phone_number || '—') + '</td>' +
       '<td>' + (u.age || '—') + '</td>' +
-      '<td>' + (u.gender || '—') + '</td>' +
+      '<td>' + escapeHtml(u.gender || '—') + '</td>' +
       '<td>' + (u.height || '—') + '</td>' +
       '<td>' + (u.weight || '—') + '</td>' +
       '<td><span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:.75rem;font-weight:700;background:' + bmi.bg + ';color:' + bmi.text + ';">' + (u.bmi ?? '—') + '</span></td>' +
-      '<td style="font-size:.8rem;">' + (u.health_goal || '—') + '</td>' +
-      '<td style="font-size:.78rem;color:var(--text-muted);">' + ((u.activity_level || '').split(' ')[0] || '—') + '</td>' +
-      '<td style="font-size:.78rem;color:var(--danger);">' + (u.allergies || 'None') + '</td>' +
+      '<td style="font-size:.8rem;">' + escapeHtml(u.health_goal || '—') + '</td>' +
+      '<td style="font-size:.78rem;color:var(--text-muted);">' + escapeHtml((u.activity_level || '').split(' ')[0] || '—') + '</td>' +
+      '<td style="font-size:.78rem;color:var(--danger);">' + escapeHtml(u.allergies || 'None') + '</td>' +
       '<td>' + statusPill + '</td>' +
       '<td><div class="action-btns">' +
-        '<button class="btn btn-ghost btn-sm" onclick="viewUserHistory(' + u.id + ', \'' + u.username + '\')" title="View History">📜</button>' +
-        '<button class="btn btn-ghost btn-sm" onclick="openResetModal(' + u.id + ', \'' + u.username + '\')" title="Reset Password">🔑</button>' +
-        (!isAdmin ? '<button class="btn btn-danger btn-sm" onclick="openDeleteModal(' + u.id + ', \'' + u.username + '\')" title="Delete User">🗑️</button>' : '') +
+        '<button class="btn btn-ghost btn-sm" onclick="viewUserHistory(' + u.id + ', \'' + escapeHtml(u.username).replace(/'/g, "\\'") + '\')" title="View History">📜</button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="openResetModal(' + u.id + ', \'' + escapeHtml(u.username).replace(/'/g, "\\'") + '\')" title="Reset Password">🔑</button>' +
+        (!isAdmin ? '<button class="btn btn-danger btn-sm" onclick="openDeleteModal(' + u.id + ', \'' + escapeHtml(u.username).replace(/'/g, "\\'") + '\')" title="Delete User">🗑️</button>' : '') +
       '</div></td>' +
     '</tr>';
   }).join('');
@@ -179,7 +186,7 @@ async function viewUserHistory(userId, username) {
   document.getElementById('historyModalBody').innerHTML = '<div style="text-align:center;padding:20px;"><div class="spinner"></div></div>';
   document.getElementById('historyModal').classList.add('active');
   try {
-    const res  = await fetch('/api/admin/user/' + userId + '/history');
+    const res  = await authFetch('/api/admin/user/' + userId + '/history');
     const data = await res.json();
     const history = data.history || [];
     if (!history.length) {
@@ -220,7 +227,7 @@ async function confirmDeleteUser() {
   btn.disabled = true;
   btn.textContent = 'Deleting...';
   try {
-    const res = await fetch('/api/admin/user/' + pendingDeleteId, { method: 'DELETE' });
+    const res = await authFetch('/api/admin/user/' + pendingDeleteId, { method: 'DELETE' });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Delete failed.');
     closeModal('deleteModal');
@@ -256,7 +263,7 @@ async function confirmResetPassword() {
   btn.disabled = true;
   btn.textContent = 'Resetting...';
   try {
-    const res = await fetch('/api/admin/user/' + pendingResetId + '/reset-password', {
+    const res = await authFetch('/api/admin/user/' + pendingResetId + '/reset-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ new_password: newPassword })
@@ -311,7 +318,7 @@ async function loadDatabasePrices() {
   tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;"><div class="spinner"></div></td></tr>';
   
   try {
-    const res = await fetch('/api/dosm-prices');
+    const res = await authFetch('/api/dosm-prices');
     if (!res.ok) throw new Error('Failed to load prices');
     const data = await res.json();
     allDatabasePrices = data.prices || [];

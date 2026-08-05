@@ -88,7 +88,7 @@ async function generateRecipeIdeas() {
   `;
   document.getElementById('generateBtn').disabled = true;
   try {
-    const res = await fetch('/api/recipe/ideas', {
+    const res = await authFetch('/api/recipe/ideas', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         ingredients: fridgeItems.map(i => i.name),
@@ -232,7 +232,7 @@ async function acceptRecipe(recipeName) {
     </div>
   `;
   try {
-    const res = await fetch('/api/recipe/full', {
+    const res = await authFetch('/api/recipe/full', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         recipe_name: recipeName,
@@ -258,12 +258,13 @@ async function acceptRecipe(recipeName) {
         });
         data.cost_rm = trueCost; // Overwrite the AI's bad math
     }
+    window._currentFullRecipe = data;
     renderFullRecipe(data);
     // Log meal
     const user = JSON.parse(sessionStorage.getItem('user')||'{}');
     if (user.user_id) {
       const nut = data.nutrition || {};
-      await fetch('/api/meal/log', {
+      await authFetch('/api/meal/log', {
         method: 'POST', headers: {'Content-Type':'application/json'},
         body: JSON.stringify({
           user_id: user.user_id,
@@ -352,8 +353,8 @@ function renderFullRecipe(data) {
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-      <button class="btn btn-secondary" onclick="saveRecipe(${JSON.stringify(data).replace(/"/g,'&quot;')})">Save to Cookbook</button>
-      ${missing.length?`<button class="btn btn-ghost" onclick="addToQuickList('${data.recipe_name.replace(/'/g,"\\'").replace(/"/g, '&quot;')}', ${JSON.stringify(missing).replace(/"/g,'&quot;')})">Add to Quick List</button>`:'<div></div>'}
+      <button class="btn btn-secondary" onclick="saveCurrentRecipe()">Save to Cookbook</button>
+      ${missing.length?`<button class="btn btn-ghost" onclick="addCurrentToQuickList()">Add to Quick List</button>`:'<div></div>'}
     </div>
     
     <a href="${waLink}" target="_blank" class="whatsapp-btn" style="display:flex; width:100%; justify-content:center; padding:14px; font-size:1.05rem; margin-bottom:12px;">
@@ -364,10 +365,19 @@ function renderFullRecipe(data) {
   </div>`;
 }
 
+function saveCurrentRecipe() {
+  saveRecipe(window._currentFullRecipe);
+}
+
+function addCurrentToQuickList() {
+  const data = window._currentFullRecipe;
+  addToQuickList(data.recipe_name, data.missing_pantry_items || []);
+}
+
 async function saveRecipe(data) {
   const user = JSON.parse(sessionStorage.getItem('user')||'{}');
   try {
-    const res = await fetch('/api/recipe/save', {
+    const res = await authFetch('/api/recipe/save', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         username: user.username,
@@ -383,7 +393,7 @@ async function saveRecipe(data) {
 async function addToQuickList(recipeName, items) {
   const user = JSON.parse(sessionStorage.getItem('user')||'{}');
   try {
-    const res = await fetch('/api/shopping/add', {
+    const res = await authFetch('/api/shopping/add', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ username: user.username, recipe_name: recipeName, items: items })
     });

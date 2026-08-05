@@ -1,11 +1,14 @@
-from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import FastAPI, HTTPException, UploadFile, File, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import Optional, List
 import numpy as np
 from PIL import Image
+import PIL.PngImagePlugin
+import PIL.JpegImagePlugin
 import io
 import re
 import google.generativeai as genai
@@ -14,13 +17,27 @@ import json
 import database as db
 import dosm_pipeline
 import os
+import logging
+from dotenv import load_dotenv
+from jose import JWTError, jwt
+from datetime import datetime, timedelta
+
+# Load environment variables from .env file
+load_dotenv()
 
 # ==========================================
 # CONFIGURATION
 # ==========================================
-GEMINI_API_KEY = "AIzaSyAIaRdmgxZ3bhyZXGtnXIcMYyTOkDBRUwA"
-GROQ_API_KEY   = "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"
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GROQ_API_KEY   = os.getenv("GROQ_API_KEY")
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "fallback-secret-change-me")
+JWT_ALGORITHM  = "HS256"
+JWT_EXPIRE_HOURS = 24
 MODEL_PATH     = "culinary_assistant_model.tflite"
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("fridge_chef")
 
 CLASS_NAMES = ['Bean', 'Beef', 'Bitter_Gourd', 'Bottle_Gourd', 'Brinjal', 'Broccoli', 
                'Cabbage', 'Carrot', 'Cucumber', 'Lemongrass', 'Papaya', 'Potato', 
@@ -28,7 +45,7 @@ CLASS_NAMES = ['Bean', 'Beef', 'Bitter_Gourd', 'Bottle_Gourd', 'Brinjal', 'Brocc
                'chilli pepper', 'eggplant', 'garlic', 'ginger', 'onion']
 
 genai.configure(api_key=GEMINI_API_KEY)
-gemini_model = genai.GenerativeModel('gemini-2.5-flash')
+gemini_model = genai.GenerativeModel('gemini-flash-latest')
 groq_client  = Groq(api_key=GROQ_API_KEY)
 
 # TFLite
@@ -51,6 +68,38 @@ except Exception as e:
 app = FastAPI(title="Fridge Chef API")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 db.init_db()
+
+# ==========================================
+# JWT AUTHENTICATION
+# ==========================================
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login", auto_error=False)
+
+def create_access_token(data: dict):
+    """Create a JWT token with expiration."""
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(hours=JWT_EXPIRE_HOURS)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=JWT_ALGORITHM)
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    """Validate JWT token and return the current user. Raises 401 if invalid."""
+    if token is None:
+        raise HTTPException(status_code=401, detail="Not authenticated. Please log in.")
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
+        username: str = payload.get("sub")
+        user_id: int = payload.get("user_id")
+        if username is None or user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid token payload.")
+        return {"username": username, "user_id": user_id, "is_admin": payload.get("is_admin", False)}
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Token expired or invalid. Please log in again.")
+
+def require_admin(current_user: dict = Depends(get_current_user)):
+    """Require admin privileges."""
+    if not current_user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required.")
+    return current_user
 
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/static", StaticFiles(directory=frontend_path), name="static")
@@ -168,8 +217,19 @@ def login(req: LoginRequest):
     user = db.login_user(req.username, req.password)
     if not user:
         raise HTTPException(status_code=401, detail="Incorrect username or password.")
+    
+    # Create JWT token
+    is_admin = user["username"] == "Admin"
+    access_token = create_access_token({
+        "sub": user["username"],
+        "user_id": user["id"],
+        "is_admin": is_admin
+    })
+    
     return {
         "success": True,
+        "access_token": access_token,
+        "token_type": "bearer",
         "user_id": user["id"],
         "username": user["username"],
         "phone_number": user.get("phone_number", ""),
@@ -181,7 +241,7 @@ def login(req: LoginRequest):
         "bmi": user.get("bmi", 22.5),
         "health_goal": user.get("health_goal", "Maintain Current Weight"),
         "allergies": user.get("allergies", ""),
-        "is_admin": user["username"] == "Admin"
+        "is_admin": is_admin
     }
 
 @app.post("/api/register")
@@ -198,7 +258,10 @@ def register(req: RegisterRequest):
     return {"success": True, "bmi": bmi}
 
 @app.post("/api/profile/update")
-def update_profile(req: UpdateProfileRequest):
+def update_profile(req: UpdateProfileRequest, current_user: dict = Depends(get_current_user)):
+    # Ensure users can only update their own profile
+    if req.username != current_user["username"]:
+        raise HTTPException(status_code=403, detail="You can only update your own profile.")
     h = req.height / 100
     bmi = round(req.weight / (h * h), 1)
     db.update_user_profile(req.username, req.phone_number, req.age, req.gender,
@@ -237,6 +300,7 @@ async def scan_gemini(file: UploadFile = File(...)):
         image = Image.open(io.BytesIO(contents)).convert("RGB")
         prompt = "Identify all the raw vegetables, fruits, meats, or proteins in this image. Return ONLY a comma-separated list of capitalized words (e.g., Cabbage, Carrot, Chicken). Do not use quotes, bullet points, or sentences."
         response = gemini_model.generate_content([prompt, image])
+            
         response_text = (getattr(response, 'text', '') or '').strip()
         if not response_text:
             return {"items": []}
@@ -247,7 +311,8 @@ async def scan_gemini(file: UploadFile = File(...)):
                 items.append(cleaned.title())
         return {"items": items}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Gemini scan error: {str(e)}")
+        logger.error(f"Gemini scan error: {e}")
+        raise HTTPException(status_code=500, detail="An error occurred during image scanning. Please try again.")
 
 @app.get("/api/dosm-prices")
 def get_dosm_prices():
@@ -325,7 +390,8 @@ def get_recipe_ideas(req: RecipeIdeasRequest):
         data = json.loads(response.choices[0].message.content)
         return {"ideas": data.get("ideas", [])}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Recipe ideas error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate recipe ideas. Please try again.")
     
 @app.post("/api/recipe/full")
 def get_full_recipe(req: FullRecipeRequest):
@@ -395,43 +461,57 @@ def get_full_recipe(req: FullRecipeRequest):
 
         return data
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Full recipe error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to generate recipe. Please try again.")
 
 # ==========================================
 # MEAL LOG
 # ==========================================
 @app.post("/api/meal/log")
-def log_meal(req: LogMealRequest):
+def log_meal(req: LogMealRequest, current_user: dict = Depends(get_current_user)):
+    # Ensure users can only log meals for themselves
+    if req.user_id != current_user["user_id"]:
+        raise HTTPException(status_code=403, detail="You can only log meals for your own account.")
     db.log_meal(req.user_id, req.recipe_name, req.calories, req.protein, req.carbs, req.fat, req.cost_rm)
     return {"success": True}
 
 @app.get("/api/meal/history/{user_id}")
-def get_history(user_id: int):
+def get_history(user_id: int, current_user: dict = Depends(get_current_user)):
+    if user_id != current_user["user_id"] and not current_user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Access denied.")
     return {"history": db.get_history(user_id)}
 
 @app.get("/api/meal/stats/{user_id}")
-def get_user_stats(user_id: int, start_date: str = None, end_date: str = None):
+def get_user_stats(user_id: int, start_date: str = None, end_date: str = None, current_user: dict = Depends(get_current_user)):
+    if user_id != current_user["user_id"] and not current_user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Access denied.")
     return {"stats": db.get_user_aggregated_stats(user_id, start_date, end_date)}
 
 # ==========================================
 # COOKBOOK & SHOPPING LIST
 # ==========================================
 @app.post("/api/recipe/save")
-def save_recipe(req: SaveRecipeRequest):
+def save_recipe(req: SaveRecipeRequest, current_user: dict = Depends(get_current_user)):
+    if req.username != current_user["username"]:
+        raise HTTPException(status_code=403, detail="You can only save recipes to your own cookbook.")
     db.save_recipe(req.username, req.recipe_name, req.ingredients_json, req.instructions_json)
     return {"success": True}
 
 @app.get("/api/recipe/saved/{username}")
-def get_saved_recipes(username: str):
+def get_saved_recipes(username: str, current_user: dict = Depends(get_current_user)):
+    if username != current_user["username"] and not current_user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Access denied.")
     return {"recipes": db.get_saved_recipes(username)}
 
 @app.delete("/api/recipe/delete/{recipe_id}")
-def delete_recipe(recipe_id: int):
+def delete_recipe(recipe_id: int, current_user: dict = Depends(get_current_user)):
     db.delete_recipe(recipe_id)
     return {"success": True}
 
 @app.get("/api/shopping/{username}")
-def get_shopping_list(username: str):
+def get_shopping_list(username: str, current_user: dict = Depends(get_current_user)):
+    if username != current_user["username"] and not current_user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Access denied.")
     items = db.get_shopping_list(username)
     
     # Attach DOSM retail reference price to each item (full retail unit price for reference)
@@ -446,12 +526,14 @@ def get_shopping_list(username: str):
     return {"items": items}
 
 @app.post("/api/shopping/add")
-def add_shopping(req: AddShoppingRequest):
+def add_shopping(req: AddShoppingRequest, current_user: dict = Depends(get_current_user)):
+    if req.username != current_user["username"]:
+        raise HTTPException(status_code=403, detail="You can only add to your own shopping list.")
     db.add_shopping_items(req.username, req.recipe_name, req.items)
     return {"success": True}
 
 @app.delete("/api/shopping/delete/{item_id}")
-def delete_shopping_item(item_id: int):
+def delete_shopping_item(item_id: int, current_user: dict = Depends(get_current_user)):
     db.delete_shopping_item(item_id)
     return {"success": True}
 
@@ -459,15 +541,15 @@ def delete_shopping_item(item_id: int):
 # ADMIN
 # ==========================================
 @app.get("/api/admin/stats")
-def admin_stats():
+def admin_stats(current_user: dict = Depends(require_admin)):
     return db.get_stats()
 
 @app.get("/api/admin/users")
-def admin_users():
+def admin_users(current_user: dict = Depends(require_admin)):
     return {"users": db.get_all_users()}
 
 @app.delete("/api/admin/user/{user_id}")
-def delete_user(user_id: int):
+def delete_user(user_id: int, current_user: dict = Depends(require_admin)):
     # Prevent deleting Admin account
     conn = db.get_connection()
     user = conn.execute("SELECT username FROM Users WHERE id=?", (user_id,)).fetchone()
@@ -481,16 +563,16 @@ class ResetPasswordRequest(BaseModel):
     new_password: str
 
 @app.post("/api/admin/user/{user_id}/reset-password")
-def reset_password(user_id: int, req: ResetPasswordRequest):
+def reset_password(user_id: int, req: ResetPasswordRequest, current_user: dict = Depends(require_admin)):
     db.reset_user_password(user_id, req.new_password)
     return {"success": True}
 
 @app.get("/api/admin/user/{user_id}/history")
-def get_user_history(user_id: int):
+def get_user_history(user_id: int, current_user: dict = Depends(require_admin)):
     return {"history": db.get_user_history(user_id)}
 
 @app.get("/api/admin/export/users")
-def export_users():
+def export_users(current_user: dict = Depends(require_admin)):
     from fastapi.responses import StreamingResponse
     import csv, io
     users = db.get_all_users()

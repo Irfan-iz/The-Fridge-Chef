@@ -113,7 +113,7 @@ async function loadProfile() {
 
   // --- Fetch history ---
   try {
-    const res  = await fetch('/api/meal/history/' + user.user_id);
+    const res  = await authFetch('/api/meal/history/' + user.user_id);
     const data = await res.json();
     const history = data.history || [];
 
@@ -228,7 +228,7 @@ async function saveProfile() {
   btn.textContent = 'Saving...';
 
   try {
-    const res = await fetch('/api/profile/update', {
+    const res = await authFetch('/api/profile/update', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: user.username, phone_number, age, gender, height, weight, activity_level, health_goal, allergies })
@@ -378,7 +378,7 @@ let url = '/api/meal/stats/' + userId;
   }
   
   try {
-    const res = await fetch(url);
+    const res = await authFetch(url);
     const data = await res.json();
     if (data.stats) {
       document.getElementById('statTotalCost').textContent = parseFloat(data.stats.total_cost).toFixed(2);

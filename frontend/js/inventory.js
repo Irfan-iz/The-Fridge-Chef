@@ -7,7 +7,11 @@ let currentMode = 'camera';
 let cameraStream = null;
 let capturedBlob = null;
 let uploadBlob = null;
-let geminiBlob = null;
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
 
 function getEmojiFor(name) {
   const lower = name.toLowerCase();
@@ -200,7 +204,7 @@ async function scanCamera() {
   try {
     const form = new FormData();
     form.append('file', capturedBlob, 'capture.jpg');
-    const res = await fetch('/api/scan/cnn', { method: 'POST', body: form });
+    const res = await authFetch('/api/scan/cnn', { method: 'POST', body: form });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail);
     showScanResult(`
@@ -214,7 +218,7 @@ async function scanCamera() {
         </div>
       </div>`);
   } catch (e) {
-    showScanResult(`<div class="alert alert-error"><span>⚠️</span>${e.message || 'Scan failed.'}</div>`);
+    showScanResult(`<div class="alert alert-error"><span>⚠️</span>Scan failed. Please try again.</div>`);
   } finally {
     hideLoading();
   }
@@ -237,7 +241,7 @@ async function scanUpload() {
   try {
     const form = new FormData();
     form.append('file', uploadBlob);
-    const res = await fetch('/api/scan/cnn', { method: 'POST', body: form });
+    const res = await authFetch('/api/scan/cnn', { method: 'POST', body: form });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail);
     showScanResult(`
@@ -251,7 +255,7 @@ async function scanUpload() {
         </div>
       </div>`);
   } catch (e) {
-    showScanResult(`<div class="alert alert-error"><span>⚠️</span>${e.message || 'Scan failed.'}</div>`);
+    showScanResult(`<div class="alert alert-error"><span>⚠️</span>Scan failed. Please try again.</div>`);
   } finally {
     hideLoading();
   }
@@ -274,7 +278,7 @@ async function scanGemini() {
   try {
     const form = new FormData();
     form.append('file', geminiBlob);
-    const res = await fetch('/api/scan/gemini', { method: 'POST', body: form });
+    const res = await authFetch('/api/scan/gemini', { method: 'POST', body: form });
     const data = await res.json();
     console.log('Gemini raw response:', data); // debug
     if (!res.ok) throw new Error(data.detail || 'Gemini API error');
@@ -297,9 +301,10 @@ async function scanGemini() {
     
     window._geminiItems.forEach((item, idx) => {
       // Sleek card layout with auto-sized buttons
+      const safeName = escapeHtml(item.name);
       html += `
         <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary); padding:10px 16px; border-radius:var(--radius-sm); border:1px solid var(--border);">
-          <span style="font-weight:600; font-size: 0.95rem;">${getEmojiFor(item.name)} ${item.name}</span>
+          <span style="font-weight:600; font-size: 0.95rem;">${getEmojiFor(item.name)} ${safeName}</span>
           <button class="btn btn-primary btn-sm" style="width:auto; padding:6px 16px; border-radius:20px;" onclick="addGeminiItem(${idx}, this)">Add</button>
         </div>
       `;

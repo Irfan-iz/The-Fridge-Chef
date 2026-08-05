@@ -6,7 +6,7 @@ async function loadQuickList() {
   const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   if (!user.username) return;
   try {
-    const res = await fetch(`/api/shopping/${user.username}`);
+    const res = await authFetch(`/api/shopping/${user.username}`);
     const data = await res.json();
     renderQuickList(data.items || []);
   } catch (e) {
@@ -78,7 +78,7 @@ async function addSingleItem(recipeName, safeId) {
   
   const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   try {
-    await fetch('/api/shopping/add', {
+    await authFetch('/api/shopping/add', {
       method: 'POST', headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ username: user.username, recipe_name: recipeName, items: [input.value.trim()] })
     });
@@ -98,7 +98,7 @@ function markAsBought(id) {
 
 async function deleteShoppingItem(id) {
   try {
-    await fetch(`/api/shopping/delete/${id}`, { method: 'DELETE' });
+    await authFetch(`/api/shopping/delete/${id}`, { method: 'DELETE' });
     loadQuickList();
   } catch(e) { showToast('Failed to delete item', 'error'); }
 }
