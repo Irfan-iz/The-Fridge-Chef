@@ -98,13 +98,41 @@ async function loadProfile() {
   document.getElementById('editGoal').value     = user.health_goal   || 'Maintain Current Weight';
   document.getElementById('editAllergies').value = user.allergies    || '';
 
-  // --- TDEE targets ---
-  const targets = calculateTDEE(
+  // --- TDEE targets via Optimizer API (with local fallback) ---
+  let targets = calculateTDEE(
     user.weight || 65, user.height || 170, user.age || 25,
     user.gender || 'Male',
     user.activity_level || 'Sedentary (Little to no exercise)',
     user.health_goal    || 'Maintain Current Weight'
   );
+
+  try {
+    const optRes = await authFetch('/api/optimizer/calculate-targets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        weight_kg: parseFloat(user.weight || 65),
+        height_cm: parseFloat(user.height || 170),
+        age: parseInt(user.age || 25),
+        gender: user.gender || 'Male',
+        activity_level: user.activity_level || 'Sedentary',
+        health_goal: user.health_goal || 'Maintain Current Weight'
+      })
+    });
+    if (optRes.ok) {
+      const optData = await optRes.json();
+      targets = {
+        calories: optData.target_calories_daily,
+        protein: optData.target_protein_g,
+        carbs: optData.target_carbs_g,
+        fat: optData.target_fat_g,
+        bmr: optData.bmr,
+        tdee: optData.tdee
+      };
+    }
+  } catch (e) {
+    console.warn('Optimizer API fallback to local calculator:', e);
+  }
 
   const tdeeEl = document.getElementById('tdeeDisplay');
   if (tdeeEl) {
@@ -122,8 +150,8 @@ async function loadProfile() {
     const streakEl = document.getElementById('cookingStreak');
     if (streakEl) {
       streakEl.innerHTML = streak > 0
-        ? '🔥 <strong>' + streak + '-day</strong> cooking streak!'
-        : '🍳 Cook a meal to start your streak!';
+        ? '<i class="fa-solid fa-fire"></i> <strong>' + streak + '-day</strong> cooking streak!'
+        : '<i class="fa-solid fa-mug-hot"></i> Cook a meal to start your streak!';
     }
 
     // Today macros
@@ -151,10 +179,10 @@ async function loadProfile() {
       if (noMealsTodayEl)  noMealsTodayEl.style.display  = 'none';
       if (macroProgressEl) macroProgressEl.style.display = 'block';
       macroProgressEl.innerHTML =
-        renderMacroBar('Calories', dailyCal,  targets.calories, '', '#FF5E3A')  +
-        renderMacroBar('Protein',  dailyPro,  targets.protein,  'g', '#3A82FF') +
-        renderMacroBar('Carbs',    dailyCarb, targets.carbs,    'g', '#32D74B') +
-        renderMacroBar('Fat',      dailyFat,  targets.fat,      'g', '#FFD60A');
+        renderMacroBar('Calories', dailyCal,  targets.calories, '', '#FF5E3A', user.health_goal || '')  +
+        renderMacroBar('Protein',  dailyPro,  targets.protein,  'g', '#3A82FF', user.health_goal || '') +
+        renderMacroBar('Carbs',    dailyCarb, targets.carbs,    'g', '#32D74B', user.health_goal || '') +
+        renderMacroBar('Fat',      dailyFat,  targets.fat,      'g', '#FFD60A', user.health_goal || '');
     }
 
     // Recent meals table
@@ -195,13 +223,49 @@ async function loadProfile() {
 // =============================================
 // MACRO BAR RENDERER
 // =============================================
-function renderMacroBar(label, current, target, unit, customColor) {
-  const pct   = target > 0 ? Math.min(Math.round((current / target) * 100), 100) : 0;
-  const color = pct >= 100 ? 'var(--danger)' : (customColor || 'var(--accent)');
+function renderMacroBar(label, current, target, unit, customColor, goal = '') {
+  const pct = target > 0 ? Math.min(Math.round((current / target) * 100), 100) : 0;
+  let color = customColor || 'var(--accent)';
+  let statusIcon = '';
+  
+  if (label === 'Calories') {
+    if (goal.includes('Loss') || goal.includes('Deficit')) {
+      if (current > target) {
+        color = 'var(--danger)';
+        statusIcon = ' <i class="fa-solid fa-circle-exclamation" style="color:var(--danger); margin-left:4px;" title="Exceeded Limit!"></i>';
+      } else if (current >= target * 0.9 && current <= target) {
+        color = 'var(--success)';
+        statusIcon = ' <i class="fa-solid fa-circle-check" style="color:var(--success); margin-left:4px;" title="On Target!"></i>';
+      }
+    } else if (goal.includes('Gain') || goal.includes('Surplus')) {
+      if (current >= target) {
+        color = 'var(--success)';
+        statusIcon = ' <i class="fa-solid fa-circle-check" style="color:var(--success); margin-left:4px;" title="Goal Reached!"></i>';
+      }
+    } else { // Maintain
+      if (current > target * 1.05) {
+        color = 'var(--danger)';
+        statusIcon = ' <i class="fa-solid fa-circle-exclamation" style="color:var(--danger); margin-left:4px;" title="Exceeded Limit!"></i>';
+      } else if (current >= target * 0.95 && current <= target * 1.05) {
+        color = 'var(--success)';
+        statusIcon = ' <i class="fa-solid fa-circle-check" style="color:var(--success); margin-left:4px;" title="On Target!"></i>';
+      }
+    }
+  } else {
+    // Macros logic
+    if (current > target * 1.1) {
+      color = 'var(--danger)';
+    } else if (current >= target * 0.85) {
+      color = 'var(--success)';
+    }
+  }
+
+  const overageText = current > target ? `<span style="color:var(--danger); font-size:0.75rem; margin-left:6px;">(Over limit)</span>` : '';
+
   return '<div style="margin-bottom:16px;">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;font-size:.85rem;margin-bottom:6px;">' +
-      '<span style="font-weight:700;color:var(--text-primary);display:flex;align-items:center;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + color + ';margin-right:6px;box-shadow:0 0 6px ' + color + '80;"></span>' + label + '</span>' +
-      '<span style="color:var(--text-primary);font-weight:600;">' + current + unit + ' <span style="font-weight:400;font-size:0.75rem;">/ ' + target + unit + '</span></span>' +
+      '<span style="font-weight:700;color:var(--text-primary);display:flex;align-items:center;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + color + ';margin-right:6px;box-shadow:0 0 6px ' + color + '80;"></span>' + label + statusIcon + '</span>' +
+      '<span style="color:var(--text-primary);font-weight:600;">' + current + unit + ' <span style="font-weight:400;font-size:0.75rem;">/ ' + target + unit + '</span>' + overageText + '</span>' +
     '</div>' +
     '<div style="height:12px;background:var(--bg-card);border-radius:99px;border:1px solid var(--border);overflow:hidden;position:relative;">' +
       '<div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:99px;transition:width 1s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:inset 0 2px 4px rgba(255,255,255,0.1);"></div>' +
@@ -271,14 +335,14 @@ async function saveProfile() {
       tdeeEl.textContent = 'Daily Targets — Calories: ' + newTargets.calories + ' kcal | Protein: ' + newTargets.protein + 'g | Carbs: ' + newTargets.carbs + 'g | Fat: ' + newTargets.fat + 'g';
     }
 
-    document.getElementById('profileAlert').innerHTML = '<div class="alert alert-success"><span>✅</span>Profile recalibrated successfully!</div>';
+    document.getElementById('profileAlert').innerHTML = '<div class="alert alert-success"><span><i class="fa-solid fa-check"></i></span>Profile recalibrated successfully!</div>';
     loadProfile();
 
   } catch (e) {
-    document.getElementById('profileAlert').innerHTML = '<div class="alert alert-error"><span>⚠️</span>' + e.message + '</div>';
+    document.getElementById('profileAlert').innerHTML = '<div class="alert alert-error"><span><i class="fa-solid fa-triangle-exclamation"></i></span>' + e.message + '</div>';
   } finally {
     btn.disabled    = false;
-    btn.textContent = '💾 Save & Recalibrate';
+    btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save & Recalibrate';
   }
 }// =============================================
 // MEAL ANALYTICS
@@ -388,3 +452,4 @@ let url = '/api/meal/stats/' + userId;
     console.error('Error fetching stats:', e);
   }
 }
+

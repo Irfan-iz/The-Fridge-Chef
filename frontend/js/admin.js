@@ -31,6 +31,24 @@ async function loadStats() {
     document.getElementById('kpiMealsToday').textContent = stats.meals_today     ?? '—';
     document.getElementById('kpiSavings').textContent    = 'RM ' + (stats.total_savings ?? '0.00');
 
+    // Real-Time Cache Telemetry on System Status KPI
+    if (stats.cache_performance) {
+      const cp = stats.cache_performance;
+      const kpis = document.querySelectorAll('.kpi-card');
+      if (kpis.length >= 5) {
+        const valEl = kpis[4].querySelector('.kpi-value');
+        const trendEl = kpis[4].querySelector('.kpi-trend');
+        if (valEl) {
+          valEl.innerHTML = `<span style="color:#22C55E;">Online</span> <span style="font-size:0.8rem;color:var(--text-muted);">(${cp.hit_rate_pct}% Cache Hit)</span>`;
+          valEl.style.fontSize = '1.05rem';
+        }
+        if (trendEl) {
+          trendEl.innerHTML = `<i class="fa-solid fa-bolt"></i> Saved ~${(cp.estimated_latency_saved_ms/1000).toFixed(1)}s LLM latency`;
+          trendEl.className = 'kpi-trend trend-up';
+        }
+      }
+    }
+
     // Charts
     renderBarChart('healthChart', stats.health_distribution || [], 'health_goal',  'count');
     renderBarChart('recipeChart', stats.top_recipes         || [], 'recipe_name', 'count');
@@ -148,9 +166,9 @@ function renderUserTable(users) {
       '<td style="font-size:.78rem;color:var(--danger);">' + escapeHtml(u.allergies || 'None') + '</td>' +
       '<td>' + statusPill + '</td>' +
       '<td><div class="action-btns">' +
-        '<button class="btn btn-ghost btn-sm" onclick="viewUserHistory(' + u.id + ', \'' + escapeHtml(u.username).replace(/'/g, "\\'") + '\')" title="View History">📜</button>' +
-        '<button class="btn btn-ghost btn-sm" onclick="openResetModal(' + u.id + ', \'' + escapeHtml(u.username).replace(/'/g, "\\'") + '\')" title="Reset Password">🔑</button>' +
-        (!isAdmin ? '<button class="btn btn-danger btn-sm" onclick="openDeleteModal(' + u.id + ', \'' + escapeHtml(u.username).replace(/'/g, "\\'") + '\')" title="Delete User">🗑️</button>' : '') +
+        '<button class="btn btn-ghost btn-sm" onclick="viewUserHistory(' + u.id + ', \'' + escapeHtml(u.username).replace(/'/g, "\\'") + '\')" title="View History"><i class="fa-solid fa-scroll"></i></button>' +
+        '<button class="btn btn-ghost btn-sm" onclick="openResetModal(' + u.id + ', \'' + escapeHtml(u.username).replace(/'/g, "\\'") + '\')" title="Reset Password"><i class="fa-solid fa-key"></i></button>' +
+        (!isAdmin ? '<button class="btn btn-danger btn-sm" onclick="openDeleteModal(' + u.id + ', \'' + escapeHtml(u.username).replace(/'/g, "\\'") + '\')" title="Delete User"><i class="fa-solid fa-trash"></i></button>' : '') +
       '</div></td>' +
     '</tr>';
   }).join('');
@@ -208,7 +226,7 @@ async function viewUserHistory(userId, username) {
       '<tbody>' + rows + '</tbody>' +
       '</table>';
   } catch (e) {
-    document.getElementById('historyModalBody').innerHTML = '<div class="alert alert-error"><span>⚠️</span>Failed to load history.</div>';
+    document.getElementById('historyModalBody').innerHTML = '<div class="alert alert-error"><span><i class="fa-solid fa-triangle-exclamation"></i></span>Failed to load history.</div>';
   }
 }
 
@@ -237,7 +255,7 @@ async function confirmDeleteUser() {
     showToast(e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = '🗑️ Yes, Delete';
+    btn.innerHTML = '<i class="fa-solid fa-trash"></i> Yes, Delete';
     pendingDeleteId = null;
   }
 }
@@ -256,7 +274,7 @@ function openResetModal(userId, username) {
 async function confirmResetPassword() {
   const newPassword = document.getElementById('resetPasswordInput').value.trim();
   if (!newPassword) {
-    document.getElementById('resetAlert').innerHTML = '<div class="alert alert-error"><span>⚠️</span>Please enter a new password.</div>';
+    document.getElementById('resetAlert').innerHTML = '<div class="alert alert-error"><span><i class="fa-solid fa-triangle-exclamation"></i></span>Please enter a new password.</div>';
     return;
   }
   const btn = document.getElementById('resetConfirmBtn');
@@ -269,13 +287,13 @@ async function confirmResetPassword() {
       body: JSON.stringify({ new_password: newPassword })
     });
     if (!res.ok) throw new Error('Reset failed.');
-    document.getElementById('resetAlert').innerHTML = '<div class="alert alert-success"><span>✅</span>Password reset successfully!</div>';
+    document.getElementById('resetAlert').innerHTML = '<div class="alert alert-success"><span><i class="fa-solid fa-check"></i></span>Password reset successfully!</div>';
     setTimeout(() => { closeModal('resetModal'); }, 1500);
   } catch (e) {
-    document.getElementById('resetAlert').innerHTML = '<div class="alert alert-error"><span>⚠️</span>' + e.message + '</div>';
+    document.getElementById('resetAlert').innerHTML = '<div class="alert alert-error"><span><i class="fa-solid fa-triangle-exclamation"></i></span>' + e.message + '</div>';
   } finally {
     btn.disabled = false;
-    btn.textContent = '🔑 Reset Password';
+    btn.innerHTML = '<i class="fa-solid fa-key"></i> Reset Password';
     pendingResetId = null;
   }
 }
@@ -297,7 +315,7 @@ function showAdminError(msg) {
   const alert = document.createElement('div');
   alert.className = 'alert alert-error';
   alert.style.marginBottom = '16px';
-  alert.innerHTML = '<span>⚠️</span>' + msg;
+  alert.innerHTML = '<span><i class="fa-solid fa-triangle-exclamation"></i></span>' + msg;
   content.prepend(alert);
 }
 
@@ -325,7 +343,7 @@ async function loadDatabasePrices() {
     renderDatabaseTable(allDatabasePrices);
   } catch (err) {
     console.error(err);
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:24px;">⚠️ Error loading database: ${err.message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--danger);padding:24px;"><i class="fa-solid fa-triangle-exclamation"></i> Error loading database: ${err.message}</td></tr>`;
   }
 }
 

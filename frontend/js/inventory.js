@@ -13,24 +13,6 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-function getEmojiFor(name) {
-  const lower = name.toLowerCase();
-  if (lower.includes('beef') || lower.includes('meat')) return '🥩';
-  if (lower.includes('chicken')) return '🍗';
-  if (lower.includes('egg')) return '🥚';
-  if (lower.includes('mee') || lower.includes('noodle')) return '🍜';
-  if (lower.includes('carrot')) return '🥕';
-  if (lower.includes('tomato')) return '🍅';
-  if (lower.includes('potato')) return '🥔';
-  if (lower.includes('onion') || lower.includes('garlic')) return '🧅';
-  if (lower.includes('cabbage') || lower.includes('kangkung') || lower.includes('lettuce')) return '🥬';
-  if (lower.includes('chili') || lower.includes('pepper')) return '🌶️';
-  if (lower.includes('fish') || lower.includes('anchov')) return '🐟';
-  if (lower.includes('rice')) return '🍚';
-  if (lower.includes('tofu')) return '🧊';
-  return '🍱';
-}
-
 function saveFridge() {
   sessionStorage.setItem('fridgeItems', JSON.stringify(fridgeItems));
 }
@@ -67,7 +49,7 @@ function renderFridge() {
         </div>
         <div style="display:flex;align-items:center;gap:12px;">
           <span style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">${item.price_rm ? 'RM ' + item.price_rm.toFixed(2) : ''}</span>
-          <button class="btn btn-ghost btn-sm" onclick="removeItem(${i})" style="color: var(--danger); font-size: 1.2rem; padding: 0 4px;" title="Remove">✕</button>
+          <button class="btn btn-ghost btn-sm" onclick="removeItem(${i})" style="color: var(--danger); font-size: 1.2rem; padding: 0 4px;" title="Remove"><i class="fa-solid fa-xmark"></i></button>
         </div>
       </div>`;
   }).join('');
@@ -118,34 +100,92 @@ function addToFridge(name, price_rm, confidence = null) {
   return true;
 }
 
+let activeMainTab = 'camera';
+let activeCameraSubTab = 'single';
+
 // ---- SCAN RESULT DISPLAY ----
 function showScanResult(html) {
-  document.getElementById('scanResult').innerHTML = html;
+  const el = document.getElementById('scanResult');
+  if (el) el.innerHTML = html;
 }
 
-// ---- MODE SWITCHING ----
-function setMode(mode, btn) {
-  currentMode = mode;
-  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  ['camera', 'upload', 'gemini', 'manual'].forEach(m => {
-    const el = document.getElementById('mode-' + m);
-    if (el) el.style.display = m === mode ? 'block' : 'none';
-  });
+// ---- REACT-STYLE MAIN TAB NAVIGATION (Camera vs Manual) ----
+function switchAddMainTab(mainTab) {
+  activeMainTab = mainTab;
+  
+  const camBtn = document.getElementById('mainTabCamera');
+  const manBtn = document.getElementById('mainTabManual');
+  const camView = document.getElementById('addCameraView');
+  const manView = document.getElementById('addManualView');
+
+  if (camBtn) camBtn.classList.toggle('active', mainTab === 'camera');
+  if (manBtn) manBtn.classList.toggle('active', mainTab === 'manual');
+  if (camView) camView.style.display = mainTab === 'camera' ? 'flex' : 'none';
+  if (manView) manView.style.display = mainTab === 'manual' ? 'flex' : 'none';
+
   showScanResult('');
   stopCamera();
+  resetScannerPreviews();
+}
+
+// ---- CAMERA SUB-TAB NAVIGATION (Upload vs Single vs Bulk) ----
+function switchCameraSubTab(subTab) {
+  activeCameraSubTab = subTab;
+
+  // Toggle Sub-Pill Buttons
+  ['upload', 'single', 'bulk'].forEach(tab => {
+    const btn = document.getElementById('subTab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+    if (btn) btn.classList.toggle('active', tab === subTab);
+    
+    const view = document.getElementById('subView' + tab.charAt(0).toUpperCase() + tab.slice(1));
+    if (view) view.style.display = tab === subTab ? 'flex' : 'none';
+  });
+
+  showScanResult('');
+  stopCamera();
+  resetScannerPreviews();
+}
+
+function resetScannerPreviews() {
   capturedBlob = uploadBlob = geminiBlob = null;
-  document.getElementById('camera-preview').style.display = 'none';
-  document.getElementById('upload-preview').style.display = 'none';
-  document.getElementById('gemini-preview').style.display = 'none';
   
-  // Reset camera UI elements properly
-  const startArea = document.getElementById('cameraStartArea');
-  if (startArea) startArea.style.display = 'flex';
+  const camPre = document.getElementById('singlePreScanState');
+  if (camPre) camPre.style.display = 'flex';
+  const camActive = document.getElementById('singleActiveStreamState');
+  if (camActive) camActive.style.display = 'none';
+
+  const camPreview = document.getElementById('camera-preview');
+  if (camPreview) { camPreview.style.display = 'none'; camPreview.src = ''; }
   const captureBtn = document.getElementById('captureBtnEl');
-  if (captureBtn) captureBtn.style.display = 'none';
-  const scanBtn = document.getElementById('scanCameraBtn');
-  if (scanBtn) scanBtn.style.display = 'none';
+  if (captureBtn) captureBtn.style.display = 'inline-flex';
+  const scanCamBtn = document.getElementById('scanCameraBtn');
+  if (scanCamBtn) scanCamBtn.style.display = 'none';
+
+  const upPreview = document.getElementById('upload-preview');
+  if (upPreview) { upPreview.style.display = 'none'; upPreview.src = ''; }
+  const upScanBtn = document.getElementById('scanUploadBtn');
+  if (upScanBtn) upScanBtn.style.display = 'none';
+
+  const gemPreview = document.getElementById('gemini-preview');
+  if (gemPreview) { gemPreview.style.display = 'none'; gemPreview.src = ''; }
+  const gemScanBtn = document.getElementById('scanGeminiBtn');
+  if (gemScanBtn) gemScanBtn.style.display = 'none';
+}
+
+// Backward compatibility helper
+function setMode(mode) {
+  if (mode === 'manual') {
+    switchAddMainTab('manual');
+  } else if (mode === 'upload') {
+    switchAddMainTab('camera');
+    switchCameraSubTab('upload');
+  } else if (mode === 'gemini') {
+    switchAddMainTab('camera');
+    switchCameraSubTab('bulk');
+  } else {
+    switchAddMainTab('camera');
+    switchCameraSubTab('single');
+  }
 }
 
 // ---- CAMERA ----
@@ -160,8 +200,16 @@ async function startCamera() {
     const video = document.getElementById('cameraStream');
     video.srcObject = cameraStream;
     video.style.display = 'block';
-    document.getElementById('cameraStartArea').style.display = 'none';
-    document.getElementById('captureBtnEl').style.display = 'inline-flex';
+
+    const preState = document.getElementById('singlePreScanState');
+    if (preState) preState.style.display = 'none';
+    const activeState = document.getElementById('singleActiveStreamState');
+    if (activeState) activeState.style.display = 'block';
+
+    const captureBtn = document.getElementById('captureBtnEl');
+    if (captureBtn) captureBtn.style.display = 'inline-flex';
+    const scanBtn = document.getElementById('scanCameraBtn');
+    if (scanBtn) scanBtn.style.display = 'none';
   } catch (e) {
     showToast('Camera access denied. Please use Upload mode instead.', 'error');
   }
@@ -188,7 +236,7 @@ function capturePhoto() {
     preview.src = URL.createObjectURL(blob);
     preview.style.display = 'block';
     
-    // Hide capture button, show analyze and Retake button
+    // Hide capture button, show analyze button
     const captureBtn = document.getElementById('captureBtnEl');
     if (captureBtn) captureBtn.style.display = 'none';
     const scanBtn = document.getElementById('scanCameraBtn');
@@ -200,7 +248,8 @@ function capturePhoto() {
 
 async function scanCamera() {
   if (!capturedBlob) return showToast('No photo captured.', 'error');
-  showLoading('Identifying ingredient...');
+  showLoading('Analyzing photo with TensorFlow Lite...');
+
   try {
     const form = new FormData();
     form.append('file', capturedBlob, 'capture.jpg');
@@ -209,16 +258,16 @@ async function scanCamera() {
     if (!res.ok) throw new Error(data.detail);
     showScanResult(`
       <div class="alert alert-success">
-        <span>✅</span>
+        <span><i class="fa-solid fa-check"></i></span>
         <div>
           <strong>${data.ingredient}</strong> detected (${data.confidence}% confidence)<br/>
           <button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="addToFridge('${data.ingredient}', null, ${data.confidence})">
-            ➕ Add to Fridge
+            <i class="fa-solid fa-plus"></i> Add to Fridge
           </button>
         </div>
       </div>`);
   } catch (e) {
-    showScanResult(`<div class="alert alert-error"><span>⚠️</span>Scan failed. Please try again.</div>`);
+    showScanResult(`<div class="alert alert-error"><span><i class="fa-solid fa-triangle-exclamation"></i></span>Scan failed. Please try again.</div>`);
   } finally {
     hideLoading();
   }
@@ -237,7 +286,8 @@ function handleUpload(event) {
 
 async function scanUpload() {
   if (!uploadBlob) return showToast('No image selected.', 'error');
-  showLoading('Identifying ingredient...');
+  showLoading('Analyzing image with TensorFlow Lite...');
+
   try {
     const form = new FormData();
     form.append('file', uploadBlob);
@@ -246,16 +296,16 @@ async function scanUpload() {
     if (!res.ok) throw new Error(data.detail);
     showScanResult(`
       <div class="alert alert-success">
-        <span>✅</span>
+        <span><i class="fa-solid fa-check"></i></span>
         <div>
           <strong>${data.ingredient}</strong> detected (${data.confidence}% confidence)<br/>
           <button class="btn btn-primary btn-sm" style="margin-top:8px;" onclick="addToFridge('${data.ingredient}', null, ${data.confidence})">
-            ➕ Add to Fridge
+            <i class="fa-solid fa-plus"></i> Add to Fridge
           </button>
         </div>
       </div>`);
   } catch (e) {
-    showScanResult(`<div class="alert alert-error"><span>⚠️</span>Scan failed. Please try again.</div>`);
+    showScanResult(`<div class="alert alert-error"><span><i class="fa-solid fa-triangle-exclamation"></i></span>Scan failed. Please try again.</div>`);
   } finally {
     hideLoading();
   }
@@ -274,7 +324,8 @@ function handleGeminiPreview(event) {
 
 async function scanGemini() {
   if (!geminiBlob) return showToast('No image selected.', 'error');
-  showLoading('Gemini AI is scanning your image...');
+  showLoading('Scanning with Gemini Vision AI...');
+
   try {
     const form = new FormData();
     form.append('file', geminiBlob);
@@ -286,7 +337,7 @@ async function scanGemini() {
     // Normalise response — backend returns string[] of item names
     const raw = data.items || [];
     if (!raw.length) {
-      showScanResult('<div class="alert alert-info"><span>ℹ️</span>No ingredients detected in the image.</div>');
+      showScanResult('<div class="alert alert-info"><span><i class="fa-solid fa-circle-info"></i></span>No ingredients detected in the image.</div>');
       return;
     }
 
@@ -296,7 +347,7 @@ async function scanGemini() {
       price_rm: typeof i === 'object' ? (i.price_rm || null) : null
     }));
 
-    let html = '<div class="alert alert-success" style="margin-bottom:16px;"><span>✅</span><strong>Found ' + window._geminiItems.length + ' item(s)!</strong></div>';
+    let html = '<div class="alert alert-success" style="margin-bottom:16px;"><span><i class="fa-solid fa-check"></i></span><strong>Found ' + window._geminiItems.length + ' item(s)!</strong></div>';
     html += '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">';
     
     window._geminiItems.forEach((item, idx) => {
@@ -304,17 +355,17 @@ async function scanGemini() {
       const safeName = escapeHtml(item.name);
       html += `
         <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-secondary); padding:10px 16px; border-radius:var(--radius-sm); border:1px solid var(--border);">
-          <span style="font-weight:600; font-size: 0.95rem;">${getEmojiFor(item.name)} ${safeName}</span>
+          <span style="font-weight:600; font-size: 0.95rem;">${safeName}</span>
           <button class="btn btn-primary btn-sm" style="width:auto; padding:6px 16px; border-radius:20px;" onclick="addGeminiItem(${idx}, this)">Add</button>
         </div>
       `;
     });
     
     html += '</div>';
-    html += '<button class="btn btn-secondary" style="width:100%; padding:12px;" onclick="addAllGeminiItems()">➕ Add All to Fridge</button>';
+    html += '<button class="btn btn-secondary" style="width:100%; padding:12px;" onclick="addAllGeminiItems()"><i class="fa-solid fa-plus"></i> Add All to Fridge</button>';
     showScanResult(html);
   } catch (e) {
-    showScanResult('<div class="alert alert-error"><span>⚠️</span>' + (e.message || 'Gemini scan failed.') + '</div>');
+    showScanResult('<div class="alert alert-error"><span><i class="fa-solid fa-triangle-exclamation"></i></span>' + (e.message || 'Gemini scan failed.') + '</div>');
   } finally {
     hideLoading();
   }
@@ -327,7 +378,7 @@ function addGeminiItem(idx, btn) {
   
   // Visual feedback on the button
   if (success && btn) {
-    btn.textContent = 'Added ✓';
+    btn.innerHTML = 'Added <i class="fa-solid fa-check"></i>';
     btn.style.background = 'var(--success)';
     btn.style.borderColor = 'var(--success)';
     btn.disabled = true;

@@ -1,8 +1,57 @@
 // =============================================
 // MEAL ENGINE — Groq-powered Recipe Generation
 // =============================================
+let currentRecipe = null;
 let recipeIdeas = [];
 let currentCardIndex = 0;
+let lastOptimizationTelemetry = null;
+
+// =============================================
+// SMART HYBRID CULINARY IMAGE ENGINE
+// =============================================
+const CULINARY_IMAGE_DATABASE = [
+  // Malaysian & Asian Specific Staples
+  { keywords: ['nasi lemak', 'sambal ikan', 'sambal telur', 'sambal sotong'], url: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['rendang', 'daging rendang', 'ayam rendang'], url: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['curry', 'kari', 'masak lemak', 'gulai', 'kurma'], url: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['fried rice', 'nasi goreng', 'rice bowl', 'nasi'], url: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['fritter', 'fritters', 'cucur', 'bakwan', 'tempura', 'gorengan'], url: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['stir fry', 'stir-fry', 'tumis', 'goreng', 'paprik', 'chilli', 'pepper', 'cabbage', 'cauliflower', 'kangkung', 'sawi'], url: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['noodle', 'noodles', 'mee', 'bihun', 'kuey teow', 'laksa', 'ramen', 'pasta', 'spaghetti'], url: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['soup', 'sup', 'broth', 'tomyum', 'tom yum', 'soto'], url: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['chicken', 'ayam', 'poultry', 'roast chicken', 'ayam bakar', 'ayam goreng'], url: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['beef', 'daging', 'steak', 'meat'], url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['fish', 'ikan', 'salmon', 'prawn', 'prawns', 'udang', 'squid', 'sotong', 'seafood'], url: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['egg', 'eggs', 'telur', 'omelette', 'omelet', 'scramble'], url: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['tofu', 'tauhu', 'tempeh', 'tempe', 'vegetarian', 'vegan'], url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['salad', 'kerabu', 'ulam', 'greens'], url: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['roti', 'flatbread', 'canai', 'wrap', 'pancake', 'toast'], url: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=700&auto=format&fit=crop&q=80' }
+];
+
+const DEFAULT_CULINARY_FALLBACK = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&auto=format&fit=crop&q=80';
+
+function getRecipeImageUrl(recipeName = '', culturalTag = '', description = '') {
+  const query = `${recipeName} ${culturalTag} ${description}`.toLowerCase();
+  
+  // 1. Check curated high-definition culinary database first
+  for (const entry of CULINARY_IMAGE_DATABASE) {
+    if (entry.keywords.some(k => query.includes(k))) {
+      return entry.url;
+    }
+  }
+  
+  // 2. AI Food Photography synthesis for unique dishes
+  const cleanPrompt = encodeURIComponent(`delicious appetizing plated ${recipeName} gourmet food photography 4k`);
+  return `https://image.pollinations.ai/prompt/${cleanPrompt}?width=700&height=450&nologo=true`;
+}
+window.getRecipeImageUrl = getRecipeImageUrl;
+
+function escapeHtmlMP(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>"']/g, function(m) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+  });
+}
 
 function getHealthInstruction() {
   const user = JSON.parse(sessionStorage.getItem('user')||'{}');
@@ -62,31 +111,14 @@ async function generateRecipeIdeas() {
   const halal = document.getElementById('halalToggle').checked;
   const mealType = document.getElementById('mealTypeSelect').value;
   
-  // 🌟 NEW: Grab the slider value 🌟
+  // <i class="fa-solid fa-star"></i> NEW: Grab the slider value <i class="fa-solid fa-star"></i>
   const prepEnabled  = document.getElementById('prepTimeToggle') ? document.getElementById('prepTimeToggle').checked : true;
   const maxPrepTime  = prepEnabled ? parseInt(document.getElementById('maxPrepTime').value) : null;
   const strictFridge = document.getElementById('strictFridgeToggle') ? document.getElementById('strictFridgeToggle').checked : false;
 
-  document.getElementById('recipeArea').innerHTML = `
-    <div class="recipe-deck">
-      <div class="skeleton-card">
-        <div class="skeleton-block sk-tags"></div>
-        <div class="skeleton-block sk-title"></div>
-        <div class="skeleton-block sk-text"></div>
-        <div class="skeleton-block sk-text"></div>
-        <div class="skeleton-block sk-text-short"></div>
-        <div style="margin-top:24px;" class="sk-box-grid">
-          <div class="skeleton-block sk-box"></div><div class="skeleton-block sk-box"></div>
-          <div class="skeleton-block sk-box"></div><div class="skeleton-block sk-box"></div>
-        </div>
-        <div style="display:flex;gap:12px;margin-top:24px;">
-           <div class="skeleton-block sk-box" style="height:44px;flex:1;"></div>
-           <div class="skeleton-block sk-box" style="height:44px;flex:1;"></div>
-        </div>
-      </div>
-    </div>
-  `;
+  showLoading('Generating delicious recipe ideas with Groq AI...');
   document.getElementById('generateBtn').disabled = true;
+
   try {
     const res = await authFetch('/api/recipe/ideas', {
       method: 'POST', headers: {'Content-Type':'application/json'},
@@ -107,30 +139,37 @@ async function generateRecipeIdeas() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Failed.');
     recipeIdeas = data.ideas || [];
+    lastOptimizationTelemetry = data.optimization_telemetry || null;
     currentCardIndex = 0;
+
+    if (data.cached) {
+      showToast(`<i class="fa-solid fa-bolt"></i> Served from real-time cache in ${data.execution_time_ms}ms!`, 'info');
+    }
     renderRecipeCard();
   } catch(e) {
-    document.getElementById('recipeArea').innerHTML=`<div class="card"><div class="alert alert-error"><span>⚠️</span>${e.message}</div></div>`;
+    document.getElementById('recipeArea').innerHTML=`<div class="card"><div class="alert alert-error"><span><i class="fa-solid fa-triangle-exclamation"></i></span>${e.message}</div></div>`;
   } finally {
     hideLoading();
     document.getElementById('generateBtn').disabled = false;
   }
 }
 
-// 🌟 UPGRADED: PREMIUM SLIDING RECIPE CARD WITH MISSING ITEMS & MACROS 🌟
+// <i class="fa-solid fa-star"></i> UPGRADED: PREMIUM SLIDING RECIPE CARD WITH MISSING ITEMS & MACROS <i class="fa-solid fa-star"></i>
 function renderRecipeCard() {
   const area = document.getElementById('recipeArea');
   if (!recipeIdeas.length || currentCardIndex >= recipeIdeas.length) {
     area.innerHTML=`<div class="card" style="text-align:center;padding:40px 20px;">
-      <div style="font-size:3rem;margin-bottom:12px;">🎉</div>
+      <div style="font-size:3rem;margin-bottom:12px;"><i class="fa-solid fa-party-horn"></i></div>
       <p style="font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:6px;">Deck exhausted!</p>
       <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:18px;">No suitable parameters accepted.</p>
-      <button class="btn btn-primary btn-sm" onclick="generateRecipeIdeas()">🔄 Query New Parameters</button>
+      <button class="btn btn-primary btn-sm" onclick="generateRecipeIdeas()"><i class="fa-solid fa-rotate"></i> Query New Parameters</button>
     </div>`;
     return;
   }
   const recipe = recipeIdeas[currentCardIndex];
-  const tags = (recipe.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
+  const tags = Array.isArray(recipe.tags)
+    ? recipe.tags.map(t => String(t).trim()).filter(Boolean)
+    : (String(recipe.tags||'')).split(',').map(t => t.trim()).filter(Boolean);
   const isFirst = currentCardIndex === 0;
   const isLast = currentCardIndex >= recipeIdeas.length - 1;
 
@@ -139,24 +178,32 @@ function renderRecipeCard() {
   let missingHtml = '';
   if (missingArr.length > 0) {
     missingHtml = `<div class="missing-alert">
-                     <span>⚠️</span>
+                     <span><i class="fa-solid fa-triangle-exclamation"></i></span>
                      <span><strong>Missing ingredients:</strong> ${missingArr.join(', ')}</span>
                    </div>`;
   } else {
     missingHtml = `<div class="missing-alert success">
-                     <span>✅</span>
+                     <span><i class="fa-solid fa-check"></i></span>
                      <span>You have all the ingredients!</span>
                    </div>`;
   }
+
+  const recipeImgUrl = recipe.image_url || getRecipeImageUrl(recipe.name, tags.join(' '), recipe.description);
 
   area.innerHTML = `
     <div class="recipe-deck">
       <div class="premium-recipe-card">
         
-        <div class="recipe-image-header" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-secondary); color: var(--text-muted); min-height: 220px; border-bottom: 1px solid var(--border);">
-          <div style="font-size: 3.5rem; margin-bottom: 8px;">🧑‍🍳</div>
-          <p style="font-size: 0.95rem; font-weight: 600;">There is no image for now</p>
-          <button class="card-save-btn" onclick="saveIdeaToCookbook()">❤️</button>
+        <div class="recipe-image-header">
+          <img 
+            src="${recipeImgUrl}" 
+            alt="${escapeHtmlMP(recipe.name)}" 
+            class="recipe-card-img" 
+            loading="lazy"
+            onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&auto=format&fit=crop&q=80';"
+          />
+          <div class="recipe-img-gradient"></div>
+          <button class="card-save-btn" onclick="saveIdeaToCookbook()" title="Save to Cookbook"><i class="fa-solid fa-heart"></i></button>
         </div>
 
         <div class="premium-card-body">
@@ -168,6 +215,20 @@ function renderRecipeCard() {
             ${tags.map(t=>`<span class="tag">${t}</span>`).join('')}
           </div>
           
+          ${(() => {
+            const optScore = recipe.optimization_score ?? (recipe.optimization_telemetry?.optimization_score ?? lastOptimizationTelemetry?.optimization_score);
+            const calMatch = recipe.calorie_accuracy_pct ?? (recipe.optimization_telemetry?.calorie_accuracy_pct ?? lastOptimizationTelemetry?.calorie_accuracy_pct);
+            const budScore = recipe.budget_efficiency_pct ?? (recipe.optimization_telemetry?.budget_efficiency_pct ?? lastOptimizationTelemetry?.budget_efficiency_pct);
+            if (optScore !== undefined && optScore !== null) {
+              return `
+                <div style="background: linear-gradient(135deg, rgba(46,125,50,0.1), rgba(200,75,49,0.06)); border: 1px solid rgba(46,125,50,0.25); border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; flex-wrap: wrap; gap: 6px;">
+                  <span style="font-weight: 700; color: var(--text-primary);"><i class="fa-solid fa-brain"></i> Optimizer Score: <strong style="color: var(--success);">${optScore}/100</strong></span>
+                  <span style="color: var(--text-muted);">Calorie Match: <strong style="color:var(--success);">${calMatch}%</strong> · Budget Score: <strong style="color:var(--accent);">${budScore}%</strong></span>
+                </div>`;
+            }
+            return '';
+          })()}
+
           <h2 style="margin-top: 0; margin-bottom: 6px; font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--text-primary);">${recipe.name}</h2>
           <p class="premium-card-desc">${recipe.description}</p>
 
@@ -181,14 +242,14 @@ function renderRecipeCard() {
           </div>
 
           <div class="recipe-meta-row">
-            <span>⏱️ ${recipe.prep_time || '25'} min</span>
+            <span><i class="fa-regular fa-clock"></i> ${recipe.prep_time || '25'} min</span>
             <span class="cost-highlight" title="Rough AI Estimate">Est. RM ${parseFloat(recipe.est_cost_rm||0).toFixed(2)}</span>
           </div>
 
           <div style="display:grid;grid-template-columns:1fr 2fr 1fr;gap:8px;">
-            <button class="btn btn-secondary" onclick="prevCard()" ${isFirst?'disabled':''}>⬅️ Prev</button>
-            <button class="btn btn-success" onclick="acceptRecipe('${recipe.name.replace(/'/g,"\\'")}')">✅ Accept</button>
-            <button class="btn btn-secondary" onclick="nextCard()" ${isLast?'disabled':''}>Next ➡️</button>
+            <button class="btn btn-secondary" onclick="prevCard()" ${isFirst?'disabled':''}><i class="fa-solid fa-arrow-left"></i> Prev</button>
+            <button class="btn btn-success" onclick="acceptRecipe('${recipe.name.replace(/'/g,"\\'")}')"><i class="fa-solid fa-check"></i> Accept</button>
+            <button class="btn btn-secondary" onclick="nextCard()" ${isLast?'disabled':''}>Next <i class="fa-solid fa-arrow-right"></i></button>
           </div>
         </div>
 
@@ -290,13 +351,15 @@ function renderFullRecipe(data) {
   const user = JSON.parse(sessionStorage.getItem('user')||'{}');
   const phone = user.phone_number || '';
   const cleanPhone = phone.replace(/\D/g,'');
-  const shoppingText = [`🍳 *${data.recipe_name}* Shopping List`,`Budget: RM ${parseFloat(data.cost_rm||0).toFixed(2)}`,'',
+  const shoppingText = [`<i class="fa-solid fa-mug-hot"></i> *${data.recipe_name}* Shopping List`,`Budget: RM ${parseFloat(data.cost_rm||0).toFixed(2)}`,'',
     ...ingredients.map(i=>`• ${i.item} — RM ${parseFloat(i.cost||0).toFixed(2)}`),
-    '', missing.length?`💡 *Buy next time:*\n${missing.map(m=>`• ${m}`).join('\n')}`:''].join('\n');
+    '', missing.length?`<i class="fa-solid fa-lightbulb"></i> *Buy next time:*\n${missing.map(m=>`• ${m}`).join('\n')}`:''].join('\n');
   const waLink = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(shoppingText)}`;
 
+  const heroImgUrl = data.image_url || getRecipeImageUrl(data.recipe_name, data.cultural_tag, '');
+
   area.innerHTML=`<div>
-<div class="premium-hero-banner">
+    <div class="premium-hero-banner" style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(15, 18, 20, 0.92) 100%), url('${heroImgUrl}');">
       <div class="premium-hero-content">
         <div style="font-size: 0.85rem; color: var(--accent-2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
           ${data.cultural_tag||'Malaysian'}
@@ -354,7 +417,7 @@ function renderFullRecipe(data) {
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
       <button class="btn btn-secondary" onclick="saveCurrentRecipe()">Save to Cookbook</button>
-      ${missing.length?`<button class="btn btn-ghost" onclick="addCurrentToQuickList()">Add to Quick List</button>`:'<div></div>'}
+      <button class="btn btn-ghost" onclick="addCurrentToQuickList()">Add to Quick List</button>
     </div>
     
     <a href="${waLink}" target="_blank" class="whatsapp-btn" style="display:flex; width:100%; justify-content:center; padding:14px; font-size:1.05rem; margin-bottom:12px;">
@@ -371,7 +434,9 @@ function saveCurrentRecipe() {
 
 function addCurrentToQuickList() {
   const data = window._currentFullRecipe;
-  addToQuickList(data.recipe_name, data.missing_pantry_items || []);
+  // Always add all ingredients, since users might want to re-stock even if they have some left.
+  const allItems = (data.ingredients || []).map(i => i.item);
+  addToQuickList(data.recipe_name, allItems);
 }
 
 async function saveRecipe(data) {

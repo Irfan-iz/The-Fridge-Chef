@@ -58,6 +58,18 @@ def init_db():
             FOREIGN KEY(user_id) REFERENCES Users(id)
         )
     ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS MealPlans (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            plan_name TEXT DEFAULT 'My Meal Plan',
+            plan_data TEXT NOT NULL,
+            total_calories INTEGER DEFAULT 0,
+            total_cost REAL DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES Users(id)
+        )
+    ''')
     # Seed admin — use bcrypt for secure hashing
     admin_pw = hash_password("Admin@1234")
     existing = c.execute("SELECT id FROM Users WHERE username=?", ("Admin",)).fetchone()
@@ -251,3 +263,33 @@ def get_stats():
         "top_recipes": [dict(r) for r in top_recipes],
         "hourly_activity": [dict(r) for r in hourly]
     }
+
+# ==========================================
+# MEAL PLAN FUNCTIONS
+# ==========================================
+def save_meal_plan(user_id, plan_name, plan_data, total_calories, total_cost):
+    conn = get_connection()
+    conn.execute('''INSERT INTO MealPlans (user_id, plan_name, plan_data, total_calories, total_cost)
+        VALUES (?, ?, ?, ?, ?)''', (user_id, plan_name, plan_data, total_calories, total_cost))
+    conn.commit()
+    conn.close()
+
+def get_meal_plans(user_id):
+    conn = get_connection()
+    rows = conn.execute('SELECT id, plan_name, plan_data, total_calories, total_cost, created_at FROM MealPlans WHERE user_id=? ORDER BY created_at DESC', (user_id,)).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+def delete_meal_plan(plan_id):
+    conn = get_connection()
+    conn.execute('DELETE FROM MealPlans WHERE id=?', (plan_id,))
+    conn.commit()
+    conn.close()
+
+def update_meal_plan(plan_id, user_id, plan_name, plan_data, total_calories, total_cost):
+    conn = get_connection()
+    conn.execute('''UPDATE MealPlans 
+        SET plan_name=?, plan_data=?, total_calories=?, total_cost=? 
+        WHERE id=? AND user_id=?''', (plan_name, plan_data, total_calories, total_cost, plan_id, user_id))
+    conn.commit()
+    conn.close()

@@ -69,13 +69,13 @@
     .status-active { background: rgba(34,197,94,0.15); color: #22C55E; }
     .status-banned { background: rgba(239,68,68,0.15); color: #EF4444; }
   </style>
-</head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
 <body>
 
 <!-- Custom Logout Modal -->
 <div id="logoutModal" class="logout-overlay" style="display:none;">
   <div class="logout-content card">
-    <div style="font-size: 3rem; margin-bottom: 16px;">🚪</div>
+    <div style="font-size: 3rem; margin-bottom: 16px;"><i class="fa-solid fa-door-open"></i></div>
     <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 8px;">Ready to leave?</h3>
     <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">Are you sure you want to log out of your admin session?</p>
     <div style="display: flex; gap: 12px; width: 100%;">
@@ -90,7 +90,7 @@
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <h3 id="historyModalTitle">User Meal History</h3>
-      <button class="btn btn-ghost btn-sm" onclick="closeModal('historyModal')">✕</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('historyModal')"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div id="historyModalBody"></div>
   </div>
@@ -101,7 +101,7 @@
   <div class="modal-box">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
       <h3>Reset Password</h3>
-      <button class="btn btn-ghost btn-sm" onclick="closeModal('resetModal')">✕</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('resetModal')"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:14px;">Set a new password for <strong id="resetUsername"></strong></p>
     <div class="form-group">
@@ -109,21 +109,21 @@
       <input type="text" class="form-input" id="resetPasswordInput" placeholder="Enter new password" />
     </div>
     <div id="resetAlert" style="margin-bottom:10px;"></div>
-    <button class="btn btn-primary" onclick="confirmResetPassword()" id="resetConfirmBtn">🔑 Reset Password</button>
+    <button class="btn btn-primary" onclick="confirmResetPassword()" id="resetConfirmBtn"><i class="fa-solid fa-key"></i> Reset Password</button>
   </div>
 </div>
 
 <!-- DELETE CONFIRM MODAL -->
 <div class="modal-overlay" id="deleteModal">
   <div class="modal-box">
-    <h3 style="color:var(--danger);">⚠️ Delete User</h3>
+    <h3 style="color:var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Delete User</h3>
     <p style="font-size:.9rem;color:var(--text-secondary);margin:14px 0;">
       Are you sure you want to delete <strong id="deleteUsername"></strong>?<br/>
       This will permanently remove all their meals, recipes and shopping list.
     </p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;">
       <button class="btn btn-ghost" onclick="closeModal('deleteModal')">Cancel</button>
-      <button class="btn btn-danger" onclick="confirmDeleteUser()" id="deleteConfirmBtn">🗑️ Yes, Delete</button>
+      <button class="btn btn-danger" onclick="confirmDeleteUser()" id="deleteConfirmBtn"><i class="fa-solid fa-trash"></i> Yes, Delete</button>
     </div>
   </div>
 </div>
@@ -163,13 +163,13 @@
       <div style="display:flex;align-items:center;gap:10px;">
         <button class="btn btn-ghost btn-sm" id="mobileMenuBtn"
           style="display:none;font-size:1.2rem;padding:4px 10px;"
-          onclick="openSidebar()">☰</button>
-        <div class="topbar-title">⚙️ System Administrator Dashboard</div>
+          onclick="openSidebar()"><i class="fa-solid fa-bars"></i></button>
+        <div class="topbar-title"><i class="fa-solid fa-gear"></i> System Administrator Dashboard</div>
       </div>
       <div class="topbar-actions">
-        <button class="btn btn-ghost btn-sm" onclick="loadStats()">🔄 Refresh</button>
-        <a href="/api/admin/export/users" class="btn btn-ghost btn-sm" download>📥 Export CSV</a>
-        <button class="theme-toggle" id="themeToggle">🌙</button>
+        <button class="btn btn-ghost btn-sm" onclick="loadStats()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        <a href="/api/admin/export/users" class="btn btn-ghost btn-sm" download><i class="fa-solid fa-inbox"></i> Export CSV</a>
+        <button class="theme-toggle" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
       </div>
     </div>
 
@@ -316,7 +316,7 @@
       <!-- SYSTEM TAB -->
       <div id="tab-system" class="tab-panel">
         <div class="card" style="text-align:center; padding: 40px 20px;">
-          <h2 style="color:var(--text-primary); margin-bottom:10px;">⚙️ System Settings</h2>
+          <h2 style="color:var(--text-primary); margin-bottom:10px;"><i class="fa-solid fa-gear"></i> System Settings</h2>
           <p style="color:var(--text-muted);">System configuration and logs will be available here soon.</p>
         </div>
       </div> <!-- END SYSTEM TAB -->
@@ -325,20 +325,20 @@
   </div>
 </div>
 
-<script src="/static/js/auth.js"></script>
-<script src="/static/js/admin.js"></script>
+<script src="/static/js/auth.js?v=2"></script>
+<script src="/static/js/admin.js?v=2"></script>
 <script>
   const user = JSON.parse(sessionStorage.getItem('user') || 'null');
   if (!user || !user.is_admin) window.location.href = '/';
 
   // Theme
   const themeBtn = document.getElementById('themeToggle');
-  themeBtn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+  themeBtn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
   themeBtn.onclick = () => {
     const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
-    themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+    themeBtn.textContent = next === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
   };
 
   // Mobile sidebar

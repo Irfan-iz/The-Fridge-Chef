@@ -74,7 +74,7 @@ async function deleteRecipe(id) {
   }
 }
 
-// 🌟 NEW: THE MAGICAL QUICK LIST TRANSFER FUNCTION 🌟
+// <i class="fa-solid fa-star"></i> NEW: THE MAGICAL QUICK LIST TRANSFER FUNCTION <i class="fa-solid fa-star"></i>
 async function addRecipeToQuickList(recipeName, ingsRaw) {
   const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   if (!user.username) return;

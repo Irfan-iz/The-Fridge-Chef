@@ -267,7 +267,7 @@ FALLBACK_PRICES = {
 @lru_cache(maxsize=1)
 def load_price_database():
     if not os.path.exists(LOOKUP_FILE) or not os.path.exists(PRICES_FILE):
-        print("⚠️  OpenDOSM CSV files not found in data/ folder.")
+        print("[WARNING] OpenDOSM CSV files not found in data/ folder.")
         return {}
 
     # Load item lookup
@@ -316,7 +316,7 @@ def load_price_database():
             'sample_count': len(price_list),
         }
 
-    print(f"✅ OpenDOSM loaded: {len(db)} items from {sum(len(v) for v in prices_by_item.values()):,} price records.")
+    print(f"[INFO] OpenDOSM loaded: {len(db)} items from {sum(len(v) for v in prices_by_item.values()):,} price records.")
     return db
 
 

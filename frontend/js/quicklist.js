@@ -17,7 +17,7 @@ async function loadQuickList() {
 function renderQuickList(items) {
   const content = document.getElementById('quicklistContent');
   if (items.length === 0) {
-    content.innerHTML = `<div class="empty-state"><div class="empty-icon">🛒</div><p>Your grocery list is empty.</p></div>`;
+    content.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-cart-shopping"></i></div><p>Your grocery list is empty.</p></div>`;
     return;
   }
 
@@ -30,7 +30,7 @@ function renderQuickList(items) {
   });
 
   // 2. Generate HTML
-  let html = `<p style="font-size:0.85rem; color:var(--success); margin-bottom:16px;">✅ Check off items as you buy them — they will be removed automatically.</p>`;
+  let html = `<p style="font-size:0.85rem; color:var(--success); margin-bottom:16px;"><i class="fa-solid fa-check"></i> Check off items as you buy them — they will be removed automatically.</p>`;
   
   for (const [recipeName, recipeItems] of Object.entries(grouped)) {
     const safeId = recipeName.replace(/[^a-zA-Z0-9]/g, '-');
@@ -38,7 +38,7 @@ function renderQuickList(items) {
     html += `
       <div class="cookbook-card" style="margin-bottom: 16px;">
         <div class="cookbook-header" style="cursor: default;">
-          <h3 style="margin:0; font-family:'Playfair Display', serif; font-size:1.1rem; color:var(--text-primary);">🍽️ ${recipeName}</h3>
+          <h3 style="margin:0; font-family:'Playfair Display', serif; font-size:1.1rem; color:var(--text-primary);"><i class="fa-solid fa-utensils"></i> ${recipeName}</h3>
           <span style="font-size:0.8rem; color:var(--accent); font-weight:700;">${recipeItems.length} items</span>
         </div>
         
@@ -53,7 +53,7 @@ function renderQuickList(items) {
                 
                 <div style="display:flex; align-items:center; gap:12px;">
                   ${item.dosm_price > 0 ? `<span style="font-size:0.85rem; color:var(--text-muted); font-weight:600;">RM ${item.dosm_price.toFixed(2)} <span style="font-size:0.72rem; color:var(--text-muted); font-weight:400;">/unit</span></span>` : ''}
-                  <button class="btn btn-ghost btn-sm" onclick="event.preventDefault(); deleteShoppingItem(${item.id})" style="color:var(--text-muted); font-size:1.2rem; padding:0;">✕</button>
+                  <button class="btn btn-ghost btn-sm" onclick="event.preventDefault(); deleteShoppingItem(${item.id})" style="color:var(--text-muted); font-size:1.2rem; padding:0;"><i class="fa-solid fa-xmark"></i></button>
                 </div>
               </label>
             `).join('')}
@@ -61,7 +61,7 @@ function renderQuickList(items) {
           
           <div style="display:flex; gap:8px;">
             <input type="text" id="add-input-${safeId}" class="form-input" placeholder="Add extra item (e.g. Salt)..." style="flex:1;" onkeypress="if(event.key === 'Enter') addSingleItem('${recipeName.replace(/'/g,"\\'")}', '${safeId}')" />
-            <button class="btn btn-secondary" onclick="addSingleItem('${recipeName.replace(/'/g,"\\'")}', '${safeId}')">➕ Add</button>
+            <button class="btn btn-secondary" onclick="addSingleItem('${recipeName.replace(/'/g,"\\'")}', '${safeId}')"><i class="fa-solid fa-plus"></i> Add</button>
           </div>
         </div>
       </div>

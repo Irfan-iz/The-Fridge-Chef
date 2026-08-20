@@ -73,14 +73,24 @@ function showToast(msg, type = 'info') {
     color:var(--text-primary); display:flex; align-items:center; gap:10px;
     animation: toastIn 0.3s ease; max-width:320px;
   `;
-  const icons = { success: '✅', error: '⚠️', info: 'ℹ️' };
+  const icons = { success: '<i class="fa-solid fa-check"></i>', error: '<i class="fa-solid fa-triangle-exclamation"></i>', info: '<i class="fa-solid fa-circle-info"></i>' };
   const safeMsg = document.createElement('span');
-  safeMsg.textContent = msg;
+  safeMsg.innerHTML = msg;
   const iconSpan = document.createElement('span');
-  iconSpan.textContent = icons[type] || 'ℹ️';
+  iconSpan.innerHTML = icons[type] || '<i class="fa-solid fa-circle-info"></i>';
   toast.appendChild(iconSpan);
   toast.appendChild(safeMsg);
   document.body.appendChild(toast);
   setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(10px)'; toast.style.transition = '0.3s'; }, 2500);
   setTimeout(() => toast.remove(), 2900);
 }
+
+// Expose utilities to global window scope
+window.getToken = getToken;
+window.setToken = setToken;
+window.clearToken = clearToken;
+window.authHeaders = authHeaders;
+window.authFetch = authFetch;
+window.showLoading = showLoading;
+window.hideLoading = hideLoading;
+window.showToast = showToast;

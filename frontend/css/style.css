@@ -1068,13 +1068,36 @@ details[open] > summary { margin-bottom: 8px; color: var(--accent); }
 
 /* Image Header */
 .recipe-image-header {
-  min-height: 200px;
-  flex: 1; /* Makes the beautiful food image grow to fill all remaining vertical space! */
-  background-color: var(--bg-secondary);
-  background-image: url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600&auto=format&fit=crop'); /* Placeholder beautiful food image */
-  background-size: cover;
-  background-position: center;
   position: relative;
+  width: 100%;
+  height: 240px;
+  min-height: 240px;
+  background-color: var(--bg-secondary);
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
+
+.recipe-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: block;
+}
+
+.premium-recipe-card:hover .recipe-card-img {
+  transform: scale(1.05);
+}
+
+.recipe-img-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%);
+  pointer-events: none;
 }
 
 /* Floating Heart Save Button */
@@ -1082,11 +1105,11 @@ details[open] > summary { margin-bottom: 8px; color: var(--accent); }
   position: absolute;
   top: 16px;
   right: 16px;
-  width: 36px;
-  height: 36px;
-  background: rgba(20, 20, 20, 0.7);
-  backdrop-filter: blur(4px);
-  border: none;
+  width: 38px;
+  height: 38px;
+  background: rgba(20, 20, 20, 0.72);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 50%;
   color: #fff;
   font-size: 1.1rem;
@@ -1095,8 +1118,9 @@ details[open] > summary { margin-bottom: 8px; color: var(--accent); }
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  z-index: 5;
 }
-.card-save-btn:hover { background: var(--danger); transform: scale(1.05); }
+.card-save-btn:hover { background: var(--danger); transform: scale(1.1); }
 
 /* Card Content Area */
 .premium-card-body {
@@ -1902,6 +1926,245 @@ details[open] > summary { color: var(--accent); margin-bottom: 8px; }
 }
 
 /* ==========================================
+   INTERACTIVE MEAL PLANNER & DAY EDITOR MODALS
+   ========================================== */
+.custom-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(10, 12, 15, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+  overflow-y: auto;
+}
+
+.custom-modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  max-width: 580px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.custom-modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-secondary);
+}
+
+.custom-modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.custom-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: var(--bg-secondary);
+}
+
+.meal-edit-tab {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: var(--bg-secondary);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+
+.meal-edit-tab-btn {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.meal-edit-tab-btn.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+
+.cookbook-picker-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cookbook-picker-item:hover {
+  background: var(--bg-card);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ==========================================
+   MINIMAL & MODERN MEAL PLANNER DAY CARDS
+   ========================================== */
+.planner-day-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.planner-day-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+}
+
+.planner-day-card.unplanned {
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border);
+  cursor: pointer;
+}
+
+.planner-day-card.unplanned:hover {
+  background: var(--bg-card);
+  border-color: var(--accent);
+  border-style: solid;
+  transform: translateY(-1px);
+}
+
+.planner-meal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #e65100;
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: capitalize;
+  min-width: 90px;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(230, 81, 0, 0.25);
+}
+
+.planner-meal-badge.lunch {
+  background: #d84315;
+}
+
+.planner-meal-badge.dinner {
+  background: #bf360c;
+}
+
+.planner-meal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.planner-meal-row:hover {
+  border-color: var(--border-focus, var(--accent));
+  background: var(--bg-card);
+}
+
+.planner-meal-empty-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: transparent;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-sm);
+  gap: 12px;
+}
+
+.planner-quick-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.planner-quick-btn:hover {
+  border-color: var(--accent);
+  background: var(--bg-hover, var(--bg-secondary));
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.planner-quick-btn.accent {
+  color: var(--accent);
+  border-color: rgba(200, 75, 49, 0.4);
+  background: rgba(200, 75, 49, 0.06);
+}
+
+.planner-quick-btn.accent:hover {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+
+/* ==========================================
    PREMIUM LOGIN PAGE UPGRADES
    ========================================== */
 .auth-panel {
@@ -1980,3 +2243,268 @@ details[open] > summary { color: var(--accent); margin-bottom: 8px; }
 .input-field-icon { display: flex; align-items: center; justify-content: center; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes scaleUp { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ==========================================
+   REAL-TIME PIPELINE PROGRESS UX
+   ========================================== */
+.realtime-pipeline-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 32px;
+  max-width: 520px;
+  width: 90%;
+  box-shadow: var(--shadow-lg), 0 0 30px rgba(200, 75, 49, 0.08);
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.realtime-pipeline-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), #2E7D32, var(--accent));
+  background-size: 200% 100%;
+  animation: shimmerGradient 2s infinite linear;
+}
+
+@keyframes shimmerGradient {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.pipeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.pipeline-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pipeline-timer {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--accent-soft);
+  color: var(--accent);
+  padding: 4px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--accent);
+}
+
+.pipeline-step-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.pipeline-step-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 13px;
+  top: 32px;
+  bottom: -10px;
+  width: 2px;
+  background: var(--border);
+  z-index: 1;
+}
+
+.pipeline-step-item.completed:not(:last-child)::after {
+  background: var(--success);
+}
+
+.pipeline-step-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  z-index: 2;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-secondary);
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+}
+
+.pipeline-step-item.active .pipeline-step-icon {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 12px rgba(200, 75, 49, 0.35);
+  animation: pulseIcon 1.5s infinite;
+}
+
+@keyframes pulseIcon {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.pipeline-step-item.completed .pipeline-step-icon {
+  background: var(--success);
+  border-color: var(--success);
+  color: #ffffff;
+}
+
+.pipeline-step-label {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.pipeline-step-item.active .pipeline-step-label {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.pipeline-step-item.completed .pipeline-step-label {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.inline-pipeline-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+}
+
+/* ==========================================
+   REACT-INSPIRED ADD INGREDIENT COMPONENT
+   ========================================== */
+.main-tabs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.main-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-tab-btn:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+.main-tab-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: 0 0 16px rgba(200, 75, 49, 0.15);
+}
+
+.add-viewport {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: rgba(0, 0, 0, 0.2);
+  min-height: 320px;
+  padding: 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.camera-sub-pill-container {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+}
+
+.camera-sub-pill-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 4px;
+  border-radius: 10px;
+  display: flex;
+  gap: 4px;
+  box-shadow: var(--shadow-sm);
+}
+
+.sub-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sub-pill-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+.sub-pill-btn.active {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-weight: 700;
+  border-color: var(--border);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.scanner-hero-view {
+  margin-top: 42px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 440px;
+  width: 100%;
+}
+
+.manual-form-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}

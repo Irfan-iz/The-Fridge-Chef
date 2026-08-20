@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fridge-chef-v1';
+const CACHE_NAME = 'fridge-chef-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -8,6 +8,7 @@ const ASSETS_TO_CACHE = [
   '/static/js/auth.js',
   '/static/js/inventory.js',
   '/static/js/meal_planner.js',
+  '/static/js/weekly_planner.js',
   '/static/js/cookbook.js',
   '/static/js/profile.js',
   '/static/js/quicklist.js',

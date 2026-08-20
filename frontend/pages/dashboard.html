@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#ff6b00">
   <link rel="stylesheet" href="/static/css/style.css" />
   <script>document.documentElement.setAttribute('data-theme', localStorage.getItem('theme') || 'light');</script>
-</head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></head>
 <body>
 <div class="loading-overlay" id="loadingOverlay">
   <div class="spinner"></div>
@@ -18,7 +18,7 @@
 <!-- Custom Logout Modal -->
 <div id="logoutModal" class="logout-overlay" style="display:none;">
   <div class="logout-content card">
-    <div style="font-size: 3rem; margin-bottom: 16px;">🚪</div>
+    <div style="font-size: 3rem; margin-bottom: 16px;"><i class="fa-solid fa-door-open"></i></div>
     <h3 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; margin-bottom: 8px;">Ready to leave?</h3>
     <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem;">Are you sure you want to log out of your session?</p>
     <div style="display: flex; gap: 12px; width: 100%;">
@@ -45,6 +45,7 @@
       <div class="nav-section-label">Kitchen</div>
       <button class="nav-item active" onclick="switchTab('inventory',this)"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span> My Fridge</button>
       <button class="nav-item" onclick="switchTab('planner',this)"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></span> Meal Engine</button>
+      <button class="nav-item" onclick="switchTab('weekly-planner',this)"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span> Meal Planner</button>
       <button class="nav-item" onclick="switchTab('cookbook',this)"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></span> Cookbook</button>
       <button class="nav-item" onclick="switchTab('quicklist',this)"><span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></span> Quick List</button>
       <div class="nav-section-label" style="margin-top:12px;">Account</div>
@@ -63,11 +64,11 @@
   <div class="main-content">
     <div class="topbar">
       <div style="display: flex; align-items: center;">
-        <button class="btn btn-ghost btn-sm" id="mobileMenuBtn" style="display:none; font-size:1.4rem; padding:4px 8px; margin-right:12px; border:none;">☰</button>
+        <button class="btn btn-ghost btn-sm" id="mobileMenuBtn" style="display:none; font-size:1.4rem; padding:4px 8px; margin-right:12px; border:none;"><i class="fa-solid fa-bars"></i></button>
         <div class="topbar-title" id="topbarTitle">My Fridge</div>
       </div>
       <div class="topbar-actions">
-        <button class="theme-toggle" id="themeToggle">🌙</button>
+        <button class="theme-toggle" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
       </div>
     </div> 
     
@@ -77,57 +78,116 @@
         <div class="grid-2" style="align-items:start;">
           <div>
             <div class="card" style="margin-bottom:18px;">
-              <div class="card-header"><div class="card-title">Add Ingredient</div></div>
-              <div class="vision-mode-selector">
-                <button class="mode-btn active" onclick="setMode('camera',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-right:4px;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg> Camera</button>
-                <button class="mode-btn" onclick="setMode('upload',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg> Upload</button>
-                <button class="mode-btn" onclick="setMode('gemini',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-right:4px;"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg> Gemini</button>
-                <button class="mode-btn" onclick="setMode('manual',this)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:text-bottom;margin-right:4px;"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg> Manual</button>
+              <!-- Header -->
+              <h2 style="font-size:1.25rem; font-weight:700; color:var(--text-primary); margin:0 0 16px 0;">Add Ingredient</h2>
+
+              <!-- Main Navigation Tabs (Camera vs Manual) -->
+              <div class="main-tabs-grid">
+                <button id="mainTabCamera" class="main-tab-btn active" onclick="switchAddMainTab('camera')">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                  <span>Camera</span>
+                </button>
+                <button id="mainTabManual" class="main-tab-btn" onclick="switchAddMainTab('manual')">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                  <span>Manual</span>
+                </button>
               </div>
-              <div id="mode-camera">
-                <video id="cameraStream" autoplay playsinline style="width:100%;border-radius:var(--radius);max-height:220px;object-fit:cover;display:none;"></video>
-                <canvas id="cameraCanvas" style="display:none;"></canvas>
+
+              <!-- Dynamic Content Area -->
+              <div class="add-viewport" id="addIngredientViewport">
                 
-                <div class="camera-area" id="cameraStartArea" onclick="startCamera()" style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 220px; cursor: pointer;">
-                  <div style="margin-bottom: 8px; opacity: 0.9;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
-                  <h3 style="margin: 0 0 6px 0; font-size: 1.1rem; color: var(--text-primary);">AI Vision Offline</h3>
-                  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px; text-align: center; max-width: 80%; line-height: 1.4;">
-                    Initialize scanner to identify raw ingredients, vegetables, and proteins in real-time.
-                  </p>
+                <!-- CAMERA MAIN TAB VIEW -->
+                <div id="addCameraView" style="width:100%; display:flex; flex-direction:column; align-items:center;">
+                  
+                  <!-- Sub-Navigation Pill Bar -->
+                  <div class="camera-sub-pill-container">
+                    <div class="camera-sub-pill-bar">
+                      <button id="subTabUpload" class="sub-pill-btn" onclick="switchCameraSubTab('upload')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        <span>Upload</span>
+                      </button>
+                      <button id="subTabSingle" class="sub-pill-btn active" onclick="switchCameraSubTab('single')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        <span>Single Snap</span>
+                      </button>
+                      <button id="subTabBulk" class="sub-pill-btn" onclick="switchCameraSubTab('bulk')">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 17 22 12"></polyline></svg>
+                        <span>Bulk Snap</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- 1. SINGLE SNAP SUB-TAB (AI VISION OFFLINE) -->
+                  <div id="subViewSingle" class="scanner-hero-view" style="display:flex;">
+                    <div id="singlePreScanState" style="display:flex; flex-direction:column; align-items:center;">
+                      <div style="color:var(--text-muted); margin-bottom:12px;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                      </div>
+                      <h3 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0 0 6px 0;">AI Vision Offline</h3>
+                      <p style="font-size:0.86rem; color:var(--text-muted); line-height:1.45; margin:0 0 20px 0; max-width:340px;">
+                        Initialize scanner to identify raw ingredients, vegetables, and proteins in real-time.
+                      </p>
+                      <button class="btn btn-primary" onclick="startCamera()" style="padding:10px 24px; font-weight:600;">
+                        Start Scanner
+                      </button>
+                    </div>
+
+                    <!-- Active Camera Stream Box -->
+                    <div id="singleActiveStreamState" style="display:none; width:100%;">
+                      <video id="cameraStream" autoplay playsinline style="width:100%; border-radius:var(--radius); max-height:220px; object-fit:cover; display:none;"></video>
+                      <canvas id="cameraCanvas" style="display:none;"></canvas>
+                      <img id="camera-preview" alt="captured" style="width:100%; border-radius:var(--radius); max-height:220px; object-fit:cover; display:none; margin-top:8px;" />
+                      
+                      <div style="display:flex; gap:8px; margin-top:12px; width:100%;">
+                        <button class="btn btn-secondary btn-sm" id="captureBtnEl" onclick="capturePhoto()" style="flex:1;"><i class="fa-solid fa-camera"></i> Capture</button>
+                        <button class="btn btn-primary btn-sm" id="scanCameraBtn" onclick="scanCamera()" style="display:none; flex:1;"><i class="fa-solid fa-magnifying-glass"></i> Identify (TFLite)</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 2. UPLOAD SUB-TAB -->
+                  <div id="subViewUpload" class="scanner-hero-view" style="display:none; cursor:pointer;" onclick="document.getElementById('uploadInput').click()">
+                    <div style="color:var(--text-muted); margin-bottom:12px;">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    </div>
+                    <h3 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0 0 6px 0;">Upload Image</h3>
+                    <p style="font-size:0.86rem; color:var(--text-muted); line-height:1.45; margin:0 0 16px 0; max-width:340px;">
+                      Select an image from your device to identify ingredients.
+                    </p>
+                    <input type="file" id="uploadInput" accept="image/*" style="display:none;" onchange="handleUpload(event)" />
+                    <img id="upload-preview" alt="preview" style="width:100%; border-radius:var(--radius); max-height:180px; object-fit:cover; display:none; margin-top:10px;" />
+                    <button class="btn btn-primary btn-sm" id="scanUploadBtn" onclick="event.stopPropagation(); scanUpload()" style="display:none; margin-top:12px; width:100%;"><i class="fa-solid fa-magnifying-glass"></i> Identify (CNN)</button>
+                  </div>
+
+                  <!-- 3. BULK SNAP (GEMINI AI) SUB-TAB -->
+                  <div id="subViewBulk" class="scanner-hero-view" style="display:none; cursor:pointer;" onclick="document.getElementById('geminiInput').click()">
+                    <div style="color:var(--text-muted); margin-bottom:12px;">
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    </div>
+                    <h3 style="font-size:1.15rem; font-weight:700; color:var(--text-primary); margin:0 0 6px 0;">Bulk Capture (Gemini AI)</h3>
+                    <p style="font-size:0.86rem; color:var(--text-muted); line-height:1.45; margin:0 0 16px 0; max-width:340px;">
+                      Take multiple pictures quickly or snap your whole fridge to analyze all ingredients at once.
+                    </p>
+                    <input type="file" id="geminiInput" accept="image/*" style="display:none;" onchange="handleGeminiPreview(event)" />
+                    <img id="gemini-preview" alt="preview" style="width:100%; border-radius:var(--radius); max-height:180px; object-fit:cover; display:none; margin-top:10px;" />
+                    <button class="btn btn-primary btn-sm" id="scanGeminiBtn" onclick="event.stopPropagation(); scanGemini()" style="display:none; margin-top:12px; width:100%;"><i class="fa-solid fa-brain"></i> Scan with Gemini AI</button>
+                  </div>
+
                 </div>
 
-                <img id="camera-preview" alt="captured" style="width:100%;border-radius:var(--radius);max-height:220px;object-fit:cover;display:none;margin-top:8px;" />
-                <div style="display:flex;gap:8px;margin-top:10px;">
-                  <button class="btn btn-secondary btn-sm" id="captureBtnEl" onclick="capturePhoto()" style="display:none;flex:1;">📸 Capture</button>
-                  <button class="btn btn-primary btn-sm" id="scanCameraBtn" onclick="scanCamera()" style="display:none;flex:1;">🔍 Identify Object</button>
+                <!-- MANUAL MAIN TAB VIEW -->
+                <div id="addManualView" class="manual-form-container" style="display:none;">
+                  <label class="form-label" style="font-weight:600; color:var(--text-primary); margin-bottom:8px;">Type ingredient name</label>
+                  <input type="text" class="form-input" id="manualInput" placeholder="e.g. Carrot" style="padding:12px 16px; font-size:0.95rem; border-radius:var(--radius-sm); margin-bottom:16px;" onkeydown="if(event.key==='Enter') addManual()" />
+                  <button class="btn btn-primary" onclick="addManual()" style="width:100%; padding:12px; font-weight:700; font-size:0.95rem; border-radius:var(--radius-sm);">
+                    Add to Fridge
+                  </button>
                 </div>
+
               </div>
-              <div id="mode-upload" style="display:none;">
-                <div class="camera-area" onclick="document.getElementById('uploadInput').click()">
-                  <div style="margin-bottom: 12px; opacity: 0.7;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg></div><p>Click to upload ingredient photo</p>
-                </div>
-                <input type="file" id="uploadInput" accept="image/*" style="display:none;" onchange="handleUpload(event)" />
-                <img id="upload-preview" alt="preview" style="width:100%;border-radius:var(--radius);max-height:200px;object-fit:cover;display:none;margin-top:10px;" />
-                <button class="btn btn-primary btn-sm" id="scanUploadBtn" onclick="scanUpload()" style="display:none;margin-top:10px;width:100%;">🔍 Identify (CNN)</button>
-              </div>
-              <div id="mode-gemini" style="display:none;">
-                <div class="camera-area" onclick="document.getElementById('geminiInput').click()">
-                  <div style="margin-bottom: 12px; opacity: 0.7;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path></svg></div>
-                  <p>Click to upload photo for Gemini AI Analysis</p>
-                  <p style="font-size:.75rem;margin-top:4px;">Gemini detects <strong>all</strong> items at once</p>
-                </div>
-                <input type="file" id="geminiInput" accept="image/*" style="display:none;" onchange="handleGeminiPreview(event)" />
-                <img id="gemini-preview" alt="preview" style="width:100%;border-radius:var(--radius);max-height:200px;object-fit:cover;display:none;margin-top:10px;" />
-                <button class="btn btn-primary btn-sm" id="scanGeminiBtn" onclick="scanGemini()" style="display:none;margin-top:10px;width:100%;">🧠 Scan with Gemini AI</button>
-              </div>
-              <div id="mode-manual" style="display:none;">
-                <div class="form-group">
-                  <label class="form-label">Type ingredient name</label>
-                  <input type="text" class="form-input" id="manualInput" placeholder="e.g. Carrot" />
-                </div>
-                <button class="btn btn-primary" onclick="addManual()" style="width:100%; padding: 12px; font-weight: 700;">Add to Fridge</button>
-              </div>
-              <div id="scanResult" style="margin-top:12px;"></div>
+
+              <!-- Scan Results Display -->
+              <div id="scanResult" style="margin-top:14px;"></div>
             </div>
           </div>
           <div>
@@ -150,168 +210,350 @@
         </div>
       </div>
 
+         <!-- ===== TAB: MEAL ENGINE (UNIFIED GENERATION HUB) ===== -->
       <div class="tab-panel" id="tab-planner">
         <div class="grid-2">
           
           <div class="constraints-panel">
-            <div class="constraint-card">
-              <div class="constraint-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:text-bottom;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Resources (Economy & Time)</div>
-              
-              <div class="constraint-group">
-                <span class="constraint-label">Budget Range (RM)</span>
-                <div class="range-wrapper" style="gap: 12px; display: flex; align-items: center;">
-                  <div style="flex:1; position: relative;">
-                    <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 700; font-size: 0.9rem;">RM</span>
-                    <input type="number" class="form-input" id="minBudget" value="5" min="1" max="50" style="padding-left: 42px; font-weight: 600; color: var(--text-primary); border-radius: 10px;">
+            <!-- Mode Switcher: Single vs Multi-Day -->
+            <div class="card" style="padding: 10px; margin-bottom: 16px; background: var(--bg-secondary); border: 1px solid var(--border);">
+              <div style="display: flex; gap: 8px;">
+                <button id="modeSingleBtn" class="btn btn-primary btn-sm" style="flex: 1; border-radius: 8px; font-weight: 700;" onclick="switchEngineMode('single')">
+                  <i class="fa-solid fa-utensils"></i> Single Recipe
+                </button>
+                <button id="modeMultiBtn" class="btn btn-secondary btn-sm" style="flex: 1; border-radius: 8px; font-weight: 700;" onclick="switchEngineMode('multi')">
+                  <i class="fa-regular fa-calendar-days"></i> Multi-Day Plan (1–7d)
+                </button>
+              </div>
+            </div>
+
+            <!-- CONTROLS: SINGLE RECIPE MODE -->
+            <div id="singleModeControls">
+              <div class="constraint-card">
+                <div class="constraint-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:text-bottom;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Resources (Economy & Time)</div>
+                
+                <div class="constraint-group">
+                  <span class="constraint-label">Budget Range (RM)</span>
+                  <div class="range-wrapper" style="gap: 12px; display: flex; align-items: center;">
+                    <div style="flex:1; position: relative;">
+                      <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 700; font-size: 0.9rem;">RM</span>
+                      <input type="number" class="form-input" id="minBudget" value="5" min="1" max="50" style="padding-left: 42px; font-weight: 600; color: var(--text-primary); border-radius: 10px;">
+                    </div>
+                    <span class="text-muted" style="font-weight: 600; color: var(--text-muted);">—</span>
+                    <div style="flex:1; position: relative;">
+                      <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 700; font-size: 0.9rem;">RM</span>
+                      <input type="number" class="form-input" id="maxBudget" value="15" min="5" max="100" style="padding-left: 42px; font-weight: 600; color: var(--text-primary); border-radius: 10px;">
+                    </div>
                   </div>
-                  <span class="text-muted" style="font-weight: 600; color: var(--text-muted);">—</span>
-                  <div style="flex:1; position: relative;">
-                    <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 700; font-size: 0.9rem;">RM</span>
-                    <input type="number" class="form-input" id="maxBudget" value="15" min="5" max="100" style="padding-left: 42px; font-weight: 600; color: var(--text-primary); border-radius: 10px;">
+                </div>
+
+                <div class="constraint-group" style="margin-bottom:0;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span class="constraint-label" style="margin-bottom:0;">Max Prep Time</span>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <span id="prepTimeVal" style="font-weight:700; font-size:0.9rem; color:var(--accent);">30 mins</span>
+                      <label class="toggle" style="transform:scale(0.85);">
+                        <input type="checkbox" id="prepTimeToggle" checked onchange="togglePrepTime()">
+                        <span class="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div id="prepTimeWrap" style="margin-top: 16px; margin-bottom: 8px;">
+                    <input type="range" id="maxPrepTime" class="custom-slider" min="10" max="120" step="5" value="30" 
+                          oninput="document.getElementById('prepTimeVal').textContent = this.value + ' mins'" />
                   </div>
                 </div>
               </div>
 
-              <div class="constraint-group" style="margin-bottom:0;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                  <span class="constraint-label" style="margin-bottom:0;">Max Prep Time</span>
-                  <div style="display:flex; align-items:center; gap:10px;">
-                    <span id="prepTimeVal" style="font-weight:700; font-size:0.9rem; color:var(--accent);">30 mins</span>
-                    <label class="toggle" style="transform:scale(0.85);">
-                      <input type="checkbox" id="prepTimeToggle" checked onchange="togglePrepTime()">
+              <div class="constraint-card">
+                <div class="constraint-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:text-bottom;"><line x1="12" y1="3" x2="12" y2="21"></line><path d="M3 14h18"></path><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg> Dietary Controls</div>
+                
+                <div class="constraint-group">
+                  <div class="toggle-group">
+                    <span class="toggle-label" style="font-weight:600; font-size:0.85rem;">Enforce Halal</span>
+                    <label class="toggle">
+                      <input type="checkbox" id="halalToggle" checked>
                       <span class="toggle-slider"></span>
                     </label>
                   </div>
                 </div>
-                <div id="prepTimeWrap" style="margin-top: 16px; margin-bottom: 8px;">
-                  <input type="range" id="maxPrepTime" class="custom-slider" min="10" max="120" step="5" value="30" 
-                        oninput="document.getElementById('prepTimeVal').textContent = this.value + ' mins'" />
+
+                <div class="constraint-group">
+                  <div class="toggle-group" style="margin-bottom:10px;">
+                    <span class="toggle-label" style="font-weight:600; font-size:0.85rem;">Enable Caloric Threshold</span>
+                    <label class="toggle">
+                      <input type="checkbox" id="calToggle" onchange="document.getElementById('calWrap').style.display=this.checked?'flex':'none'">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                  <div class="range-wrapper" id="calWrap" style="display:none; gap: 12px; align-items: center; margin-top: 12px;">
+                    <div style="flex:1; position: relative;">
+                      <input type="number" class="form-input" id="minCal" value="300" step="50" style="padding-right: 42px; font-weight: 600; border-radius: 10px;">
+                      <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.8rem;">kcal</span>
+                    </div>
+                    <span class="text-muted" style="font-weight: 600; color: var(--text-muted);">—</span>
+                    <div style="flex:1; position: relative;">
+                      <input type="number" class="form-input" id="maxCal" value="800" step="50" style="padding-right: 42px; font-weight: 600; border-radius: 10px;">
+                      <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.8rem;">kcal</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="constraint-group">
+                  <div class="toggle-group">
+                    <div>
+                      <span class="toggle-label" style="font-weight:600; font-size:0.85rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Strict Fridge Mode</span>
+                      <p style="font-size:.72rem; color:var(--text-muted); margin-top:4px;">Only use ingredients currently in your fridge</p>
+                    </div>
+                    <label class="toggle">
+                      <input type="checkbox" id="strictFridgeToggle">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="constraint-group" style="margin-bottom:0;">
+                  <div class="toggle-group">
+                    <div>
+                      <span class="toggle-label" style="font-weight:600; font-size:0.85rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Health Optimization</span>
+                      <p style="font-size:.72rem; color:var(--text-muted); margin-top:4px;">Apply your BMI & goal to recipe selection</p>
+                    </div>
+                    <label class="toggle">
+                      <input type="checkbox" id="healthModeToggle" checked onchange="updateHealthBadge()">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
                 </div>
               </div>
+
+              <div class="constraint-card">
+                <div class="constraint-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:text-bottom;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg> Flavor & Meal Profile</div>
+                
+                <div class="constraint-group">
+                  <span class="constraint-label">Meal Category</span>
+                  <div style="position: relative;">
+                    <select class="form-select custom-select" id="mealTypeSelect" style="appearance: none; -webkit-appearance: none; padding-right: 36px; border-radius: 10px; font-weight: 500;">
+                      <option>Any Meal</option>
+                      <option>Breakfast</option>
+                      <option>Lunch</option>
+                      <option>Dinner</option>
+                      <option>Snack / Light Bite</option>
+                    </select>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted);"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </div>
+                </div>
+
+                <div class="constraint-group">
+                  <span class="constraint-label">Cuisine Filter</span>
+                  <div style="position: relative;">
+                    <select class="form-select custom-select" id="cuisineSelect" style="appearance: none; -webkit-appearance: none; padding-right: 36px; border-radius: 10px; font-weight: 500;" onchange="document.getElementById('stateWrap').style.display=this.value==='Local (Malaysian)'?'block':'none'">
+                      <option>Local (Malaysian)</option>
+                      <option>Asian</option>
+                      <option>Western</option>
+                      <option>Middle Eastern</option>
+                      <option>Fusion / Any</option>
+                    </select>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted);"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </div>
+                </div>
+
+                <div class="constraint-group" id="stateWrap" style="margin-bottom:0;">
+                  <span class="constraint-label">State-Specific Origin</span>
+                  <div style="position: relative;">
+                    <select class="form-select custom-select" id="stateSelect" style="appearance: none; -webkit-appearance: none; padding-right: 36px; border-radius: 10px; font-weight: 500;">
+                      <option>Any State</option>
+                      <option>Johor</option><option>Kedah</option><option>Kelantan</option>
+                      <option>Melaka</option><option>Negeri Sembilan</option><option>Pahang</option>
+                      <option>Penang</option><option>Perak</option><option>Perlis</option>
+                      <option>Sabah</option><option>Sarawak</option><option>Selangor</option>
+                      <option>Terengganu</option>
+                    </select>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted);"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </div>
+                </div>
+              </div>
+
+              <button class="btn btn-primary" style="margin-top:20px; width:100%; font-weight:700; padding:14px; border-radius:12px;" onclick="generateRecipeIdeas()" id="generateBtn">Initialize Decision Engine</button>
             </div>
 
-            <div class="constraint-card">
-              <div class="constraint-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:text-bottom;"><line x1="12" y1="3" x2="12" y2="21"></line><path d="M3 14h18"></path><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg> Dietary Controls</div>
-              
-              <div class="constraint-group">
-                <div class="toggle-group">
-                  <span class="toggle-label" style="font-weight:600; font-size:0.85rem;">Enforce Halal</span>
-                  <label class="toggle">
-                    <input type="checkbox" id="halalToggle" checked>
-                    <span class="toggle-slider"></span>
-                  </label>
+            <!-- CONTROLS: MULTI-DAY PLANNER MODE -->
+            <div id="multiModeControls" style="display:none;">
+              <div class="constraint-card">
+                <div class="constraint-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:text-bottom;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Plan Schedule &amp; Duration</div>
+                
+                <span class="constraint-label">Select Duration</span>
+                <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 16px;">
+                  <button type="button" class="btn btn-secondary btn-sm duration-btn" data-days="1" onclick="setPlanDays(1, this)" style="border-radius:8px;padding:8px 4px;font-weight:700;font-size:0.78rem;">1 Day</button>
+                  <button type="button" class="btn btn-primary btn-sm duration-btn active" data-days="3" onclick="setPlanDays(3, this)" style="border-radius:8px;padding:8px 4px;font-weight:700;font-size:0.78rem;">3 Days</button>
+                  <button type="button" class="btn btn-secondary btn-sm duration-btn" data-days="5" onclick="setPlanDays(5, this)" style="border-radius:8px;padding:8px 4px;font-weight:700;font-size:0.78rem;">5 Days</button>
+                  <button type="button" class="btn btn-secondary btn-sm duration-btn" data-days="7" onclick="setPlanDays(7, this)" style="border-radius:8px;padding:8px 4px;font-weight:700;font-size:0.78rem;">7 Days</button>
                 </div>
-              </div>
+                <input type="hidden" id="mpNumDays" value="3" />
 
-              <div class="constraint-group">
-                <div class="toggle-group" style="margin-bottom:10px;">
-                  <span class="toggle-label" style="font-weight:600; font-size:0.85rem;">Enable Caloric Threshold</span>
-                  <label class="toggle">
-                    <input type="checkbox" id="calToggle" onchange="document.getElementById('calWrap').style.display=this.checked?'flex':'none'">
-                    <span class="toggle-slider"></span>
-                  </label>
-                </div>
-                <div class="range-wrapper" id="calWrap" style="display:none; gap: 12px; align-items: center; margin-top: 12px;">
-                  <div style="flex:1; position: relative;">
-                    <input type="number" class="form-input" id="minCal" value="300" step="50" style="padding-right: 42px; font-weight: 600; border-radius: 10px;">
-                    <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.8rem;">kcal</span>
-                  </div>
-                  <span class="text-muted" style="font-weight: 600; color: var(--text-muted);">—</span>
-                  <div style="flex:1; position: relative;">
-                    <input type="number" class="form-input" id="maxCal" value="800" step="50" style="padding-right: 42px; font-weight: 600; border-radius: 10px;">
-                    <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.8rem;">kcal</span>
+                <div class="constraint-group">
+                  <span class="constraint-label">Total Plan Budget (RM)</span>
+                  <div class="range-wrapper" style="gap: 12px; display: flex; align-items: center;">
+                    <div style="flex:1; position: relative;">
+                      <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 700; font-size: 0.9rem;">RM</span>
+                      <input type="number" class="form-input" id="mpMinBudget" value="15" min="1" max="100" style="padding-left: 42px; font-weight: 600; color: var(--text-primary); border-radius: 10px;">
+                    </div>
+                    <span class="text-muted" style="font-weight: 600; color: var(--text-muted);">—</span>
+                    <div style="flex:1; position: relative;">
+                      <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 700; font-size: 0.9rem;">RM</span>
+                      <input type="number" class="form-input" id="mpMaxBudget" value="60" min="5" max="300" style="padding-left: 42px; font-weight: 600; color: var(--text-primary); border-radius: 10px;">
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div class="constraint-group">
-                <div class="toggle-group">
-                  <div>
-                    <span class="toggle-label" style="font-weight:600; font-size:0.85rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> Strict Fridge Mode</span>
-                    <p style="font-size:.72rem; color:var(--text-muted); margin-top:4px;">Only use ingredients currently in your fridge</p>
+              <div class="constraint-card">
+                <div class="constraint-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:text-bottom;"><line x1="12" y1="3" x2="12" y2="21"></line><path d="M3 14h18"></path><path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"></path></svg> Nutrition &amp; Dietary Controls</div>
+
+                <div class="constraint-group">
+                  <div class="toggle-group">
+                    <span class="toggle-label" style="font-weight:600; font-size:0.85rem;">Enforce Halal</span>
+                    <label class="toggle">
+                      <input type="checkbox" id="mpHalalToggle" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
                   </div>
-                  <label class="toggle">
-                    <input type="checkbox" id="strictFridgeToggle">
-                    <span class="toggle-slider"></span>
-                  </label>
+                </div>
+
+                <div class="constraint-group">
+                  <div class="toggle-group" style="margin-bottom:10px;">
+                    <span class="toggle-label" style="font-weight:600; font-size:0.85rem;">Daily Calorie Target</span>
+                    <label class="toggle">
+                      <input type="checkbox" id="mpCalToggle" onchange="toggleMPCalories()">
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                  <div class="range-wrapper" id="mpCalRangeWrap" style="display:none; gap: 12px; align-items: center; margin-top: 12px;">
+                    <div style="flex:1; position: relative;">
+                      <input type="number" class="form-input" id="mpMinCal" value="1200" step="50" style="padding-right: 42px; font-weight: 600; border-radius: 10px;">
+                      <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.8rem;">kcal</span>
+                    </div>
+                    <span class="text-muted" style="font-weight: 600; color: var(--text-muted);">—</span>
+                    <div style="flex:1; position: relative;">
+                      <input type="number" class="form-input" id="mpMaxCal" value="2200" step="50" style="padding-right: 42px; font-weight: 600; border-radius: 10px;">
+                      <span style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.8rem;">kcal</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="constraint-group" style="margin-bottom:0;">
+                  <div class="toggle-group">
+                    <div>
+                      <span class="toggle-label" style="font-weight:600; font-size:0.85rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Health Optimization</span>
+                      <p style="font-size:.72rem; color:var(--text-muted); margin-top:4px;">Apply BMI &amp; goal to all generated meals</p>
+                    </div>
+                    <label class="toggle">
+                      <input type="checkbox" id="mpHealthToggle" checked>
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
-              <div class="constraint-group" style="margin-bottom:0;">
-                <div class="toggle-group">
-                  <div>
-                    <span class="toggle-label" style="font-weight:600; font-size:0.85rem;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg> Health Optimization</span>
-                    <p style="font-size:.72rem; color:var(--text-muted); margin-top:4px;">Apply your BMI & goal to recipe selection</p>
+              <div class="constraint-card">
+                <div class="constraint-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:text-bottom;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg> Region &amp; DOSM State Pricing</div>
+
+                <div class="constraint-group">
+                  <span class="constraint-label">Regional Style</span>
+                  <div style="position: relative;">
+                    <select class="form-select custom-select" id="mpCuisineSelect" style="appearance: none; -webkit-appearance: none; padding-right: 36px; border-radius: 10px; font-weight: 500;">
+                      <option>Local (Malaysian)</option>
+                      <option>Asian</option>
+                      <option>Western</option>
+                      <option>Middle Eastern</option>
+                      <option>Fusion / Any</option>
+                    </select>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted);"><polyline points="6 9 12 15 18 9"></polyline></svg>
                   </div>
-                  <label class="toggle">
-                    <input type="checkbox" id="healthModeToggle" checked onchange="updateHealthBadge()">
-                    <span class="toggle-slider"></span>
-                  </label>
+                </div>
+
+                <div class="constraint-group" style="margin-bottom:0;">
+                  <span class="constraint-label">Price Localization (State)</span>
+                  <div style="position: relative;">
+                    <select class="form-select custom-select" id="mpStateSelect" style="appearance: none; -webkit-appearance: none; padding-right: 36px; border-radius: 10px; font-weight: 500;">
+                      <option>Any State</option>
+                      <option>Johor</option><option>Kedah</option><option>Kelantan</option>
+                      <option>Melaka</option><option>Negeri Sembilan</option><option>Pahang</option>
+                      <option>Penang</option><option>Perak</option><option>Perlis</option>
+                      <option>Sabah</option><option>Sarawak</option><option>Selangor</option>
+                      <option>Terengganu</option>
+                    </select>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted);"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </div>
                 </div>
               </div>
+
+              <button class="btn btn-primary" style="margin-top:20px; width:100%; font-weight:700; padding:14px; border-radius:12px;" onclick="generateMealPlan()" id="mpGenerateBtn"><i class="fa-solid fa-brain"></i> Generate Multi-Day Plan</button>
             </div>
-
-            <div class="constraint-card">
-              <div class="constraint-header"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:text-bottom;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg> Flavor & Meal Profile</div>
-              
-              <div class="constraint-group">
-                <span class="constraint-label">Meal Category</span>
-                <div style="position: relative;">
-                  <select class="form-select custom-select" id="mealTypeSelect" style="appearance: none; -webkit-appearance: none; padding-right: 36px; border-radius: 10px; font-weight: 500;">
-                    <option>Any Meal</option>
-                    <option>Breakfast</option>
-                    <option>Lunch</option>
-                    <option>Dinner</option>
-                    <option>Snack / Light Bite</option>
-                  </select>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted);"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </div>
-              </div>
-
-              <div class="constraint-group">
-                <span class="constraint-label">Cuisine Filter</span>
-                <div style="position: relative;">
-                  <select class="form-select custom-select" id="cuisineSelect" style="appearance: none; -webkit-appearance: none; padding-right: 36px; border-radius: 10px; font-weight: 500;" onchange="document.getElementById('stateWrap').style.display=this.value==='Local (Malaysian)'?'block':'none'">
-                    <option>Local (Malaysian)</option>
-                    <option>Asian</option>
-                    <option>Western</option>
-                    <option>Middle Eastern</option>
-                    <option>Fusion / Any</option>
-                  </select>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted);"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </div>
-              </div>
-
-              <div class="constraint-group" id="stateWrap" style="margin-bottom:0;">
-                <span class="constraint-label">State-Specific Origin</span>
-                <div style="position: relative;">
-                  <select class="form-select custom-select" id="stateSelect" style="appearance: none; -webkit-appearance: none; padding-right: 36px; border-radius: 10px; font-weight: 500;">
-                    <option>Any State</option>
-                    <option>Johor</option><option>Kedah</option><option>Kelantan</option>
-                    <option>Melaka</option><option>Negeri Sembilan</option><option>Pahang</option>
-                    <option>Penang</option><option>Perak</option><option>Perlis</option>
-                    <option>Sabah</option><option>Sarawak</option><option>Selangor</option>
-                    <option>Terengganu</option>
-                  </select>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted);"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </div>
-              </div>
-            </div>
-
-            <button class="btn btn-primary" style="margin-top:20px; width:100%; font-weight:700; padding:14px; border-radius:12px;" onclick="generateRecipeIdeas()" id="generateBtn">Initialize Decision Engine</button>
           </div>
 
-          <div id="recipeArea">
-            <div class="card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:400px; text-align:center; color:var(--text-muted);">
-              <div style="margin-bottom:24px; position:relative;">
-                <div style="position:absolute; inset:-20px; background:radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity:0.1; border-radius:50%; filter:blur(10px);"></div>
-                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.9; position:relative; z-index:2; filter: drop-shadow(0 0 8px rgba(200,75,49,0.3));"><path d="M12 2a2 2 0 0 1 2 2c0 1.1-.9 2-2 2s-2-.9-2-2a2 2 0 0 1 2-2z"></path><path d="M12 6c4.4 0 8 3.6 8 8v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6c0-4.4 3.6-8 8-8z"></path><path d="M8 12v.01"></path><path d="M16 12v.01"></path><path d="M12 16c-1.1 0-2-.9-2-2h4c0 1.1-.9 2-2 2z"></path></svg>
+          <!-- RIGHT: RECIPE & PLAN RESULTS AREA -->
+          <div>
+            <div id="recipeArea">
+              <div class="card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:400px; text-align:center; color:var(--text-muted);">
+                <div style="margin-bottom:24px; position:relative;">
+                  <div style="position:absolute; inset:-20px; background:radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity:0.1; border-radius:50%; filter:blur(10px);"></div>
+                  <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.9; position:relative; z-index:2; filter: drop-shadow(0 0 8px rgba(200,75,49,0.3));"><path d="M12 2a2 2 0 0 1 2 2c0 1.1-.9 2-2 2s-2-.9-2-2a2 2 0 0 1 2-2z"></path><path d="M12 6c4.4 0 8 3.6 8 8v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6c0-4.4 3.6-8 8-8z"></path><path d="M8 12v.01"></path><path d="M16 12v.01"></path><path d="M12 16c-1.1 0-2-.9-2-2h4c0 1.1-.9 2-2 2z"></path></svg>
+                </div>
+                <p style="font-size:1.1rem; font-weight:700; color:var(--text-primary); letter-spacing:0.5px;">Decision Engine Ready.</p>
+                <p style="font-size:0.9rem; max-width:280px; margin-top:12px; line-height:1.5; color:var(--text-muted);">Configure your constraints on the left and initialize the AI Engine for single recipes or multi-day planning.</p>
               </div>
-              <p style="font-size:1.1rem; font-weight:700; color:var(--text-primary); letter-spacing:0.5px;">System Ready.</p>
-              <p style="font-size:0.9rem; max-width:280px; margin-top:12px; line-height:1.5; color:var(--text-muted);">Configure your dietary and budget constraints on the left and initialize the AI Engine.</p>
             </div>
           </div>
 
+        </div>
+      </div>
+
+      <!-- ===== TAB: MEAL PLANNER (WEEKLY CALENDAR & SCHEDULE HUB) ===== -->
+      <div class="tab-panel" id="tab-weekly-planner">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h2 style="font-family:'Playfair Display',serif; font-size:1.6rem; margin:0; color:var(--text-primary);"><i class="fa-regular fa-calendar-days"></i> Weekly Meal Planner &amp; Schedule</h2>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin:4px 0 0;">View, manage, customize, and execute your day-by-day meal schedule.</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="openCreatePlanModal()" style="border-radius:8px; font-weight:700;">
+              <i class="fa-solid fa-plus"></i> Create Custom Plan
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="switchTab('planner'); switchEngineMode('multi');" style="border-radius:8px; font-weight:700;">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Generate AI Plan
+            </button>
+          </div>
+        </div>
+
+        <!-- ACTIVE PLAN VIEW -->
+        <div id="activePlanSection">
+          <div class="card" style="margin-bottom:24px;">
+            <div id="plannerCalendarArea">
+              <div class="empty-state" style="padding:40px;">
+                <div style="font-size:3rem; margin-bottom:12px; opacity:0.3;"><i class="fa-regular fa-calendar-days"></i></div>
+                <p style="font-weight:700; font-size:1.1rem; color:var(--text-primary); margin-bottom:6px;">No Active Weekly Plan</p>
+                <p style="font-size:0.85rem; color:var(--text-muted); max-width:320px; margin:0 auto 16px;">Generate a 1 to 7 day meal plan in the Meal Engine and save it here to track your daily schedule.</p>
+                <button class="btn btn-primary" onclick="switchTab('planner'); switchEngineMode('multi');" style="border-radius:10px; font-weight:700;">
+                  Go to Meal Engine →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAVED PLANS HISTORY DRAWER -->
+        <div class="card">
+          <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="card-title"><i class="fa-solid fa-clipboard-list"></i> Saved Meal Plans History</div>
+            <button class="btn btn-ghost btn-sm" onclick="loadSavedMealPlans()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+          </div>
+          <div id="savedPlansList">
+            <div class="empty-state" style="padding:30px;">
+              <div style="font-size:2rem; margin-bottom:8px; opacity:0.3;"><i class="fa-solid fa-clipboard-list"></i></div>
+              <p style="font-weight:600; color:var(--text-primary); margin-bottom:4px;">No saved plans</p>
+              <p style="font-size:0.8rem; color:var(--text-muted);">Generated meal plans saved by you will appear here.</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -491,13 +733,175 @@
           </div>
         </div>
       </div>
+    </div> 
+  </div> 
+</div> 
 
-    </div> </div> </div> <script src="/static/js/auth.js"></script>
-<script src="/static/js/inventory.js"></script>
-<script src="/static/js/meal_planner.js"></script>
-<script src="/static/js/cookbook.js"></script>
-<script src="/static/js/profile.js"></script>
-<script src="/static/js/quicklist.js"></script>
+<!-- Custom Meal Plan Creation Modal -->
+<div id="createPlanModal" class="custom-modal-overlay" style="display:none;">
+  <div class="custom-modal-card" style="max-width:520px;">
+    <div class="custom-modal-header">
+      <h3><span><i class="fa-solid fa-plus"></i></span> Create Custom Meal Plan</h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeCreatePlanModal()" style="font-size:1.2rem; line-height:1; padding:4px 8px;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="custom-modal-body">
+      <div style="margin-bottom:18px;">
+        <label class="form-label" style="font-weight:600; margin-bottom:6px;">Plan Title</label>
+        <input type="text" id="customPlanTitle" class="form-input" placeholder="e.g., My Custom High-Protein Plan" value="My Custom Meal Plan" style="padding-left:12px; font-weight:600;" />
+      </div>
+      <div style="margin-bottom:18px;">
+        <label class="form-label" style="font-weight:600; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+          <span>Plan Duration: <strong id="customPlanDaysDisplay" style="color:var(--accent); font-size:1.05rem;">5 Days</strong></span>
+          <span style="font-size:0.75rem; color:var(--text-muted); font-weight:500;">(Choose 1 to 7 Days)</span>
+        </label>
+        <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:6px; margin-bottom:8px;">
+          <button type="button" class="btn btn-secondary custom-days-btn" onclick="selectCustomPlanDays(1, this)" style="padding:10px 0; font-weight:700; font-size:0.85rem;">1D</button>
+          <button type="button" class="btn btn-secondary custom-days-btn" onclick="selectCustomPlanDays(2, this)" style="padding:10px 0; font-weight:700; font-size:0.85rem;">2D</button>
+          <button type="button" class="btn btn-secondary custom-days-btn" onclick="selectCustomPlanDays(3, this)" style="padding:10px 0; font-weight:700; font-size:0.85rem;">3D</button>
+          <button type="button" class="btn btn-secondary custom-days-btn" onclick="selectCustomPlanDays(4, this)" style="padding:10px 0; font-weight:700; font-size:0.85rem;">4D</button>
+          <button type="button" class="btn btn-primary custom-days-btn active" onclick="selectCustomPlanDays(5, this)" style="padding:10px 0; font-weight:700; font-size:0.85rem;">5D</button>
+          <button type="button" class="btn btn-secondary custom-days-btn" onclick="selectCustomPlanDays(6, this)" style="padding:10px 0; font-weight:700; font-size:0.85rem;">6D</button>
+          <button type="button" class="btn btn-secondary custom-days-btn" onclick="selectCustomPlanDays(7, this)" style="padding:10px 0; font-weight:700; font-size:0.85rem;">7D</button>
+        </div>
+        <input type="hidden" id="customPlanDaysCount" value="5" />
+      </div>
+      <div style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; font-size:0.82rem; color:var(--text-secondary); line-height:1.45;">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> <strong>How it works:</strong> Antigravity will generate <strong id="customPlanBoxesCountText">5 Day Boxes</strong> for you. You can easily edit each day, customize every meal, or choose recipes directly from your <strong>Digital Cookbook</strong>!
+      </div>
+    </div>
+    <div class="custom-modal-footer">
+      <button class="btn btn-secondary" onclick="closeCreatePlanModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitCreateCustomPlan()"><i class="fa-solid fa-wand-magic-sparkles"></i> Start Planning</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Day Menu Modal -->
+<div id="editDayModal" class="custom-modal-overlay" style="display:none;">
+  <div class="custom-modal-card" style="max-width:640px;">
+    <div class="custom-modal-header">
+      <h3><span id="editDayModalIcon"><i class="fa-regular fa-calendar-days"></i></span> <span id="editDayModalTitle">Edit Day Menu</span></h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeEditDayModal()" style="font-size:1.2rem; line-height:1; padding:4px 8px;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="custom-modal-body">
+      <!-- Day Label Edit -->
+      <div style="margin-bottom:14px; display:flex; gap:10px; align-items:flex-end;">
+        <div style="flex:1;">
+          <label class="form-label" style="font-weight:600; margin-bottom:4px;">Day Title</label>
+          <input type="text" id="editDayNameInput" class="form-input" placeholder="e.g. Monday" style="padding-left:12px; font-weight:600;" />
+        </div>
+        <button type="button" class="btn btn-secondary" onclick="autoPlanDayWithMealEngine(editingDayIndex, editingDayContext)" title="Auto-generate 3 balanced meals for this day using Meal Engine AI" style="font-weight:700; color:var(--accent); display:flex; align-items:center; gap:6px; font-size:0.82rem; height:42px; white-space:nowrap;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Plan Day with AI
+        </button>
+      </div>
+
+      <!-- Meal Selection Tabs -->
+      <div class="meal-edit-tab" style="margin-bottom:14px;">
+        <button type="button" class="meal-edit-tab-btn active" id="tabBtnBreakfast" onclick="switchMealEditTab('breakfast')"><i class="fa-solid fa-sun"></i> Breakfast</button>
+        <button type="button" class="meal-edit-tab-btn" id="tabBtnLunch" onclick="switchMealEditTab('lunch')"><i class="fa-solid fa-sun"></i> Lunch</button>
+        <button type="button" class="meal-edit-tab-btn" id="tabBtnDinner" onclick="switchMealEditTab('dinner')"><i class="fa-solid fa-moon"></i> Dinner</button>
+      </div>
+
+      <!-- Quick Action Toolbar for Active Meal -->
+      <div style="background:var(--bg-secondary); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px 12px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="openCookbookPickerModal(editingDayIndex, editingActiveMeal, editingDayContext)" style="font-size:0.78rem; font-weight:700; display:flex; align-items:center; gap:5px;">
+            <i class="fa-solid fa-book-open"></i> Pick from Cookbook
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="suggestMealForActiveTab()" style="font-size:0.78rem; font-weight:700; color:var(--accent); display:flex; align-items:center; gap:5px;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> AI Suggest Dish
+          </button>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button type="button" class="btn btn-ghost btn-sm" onclick="clearCurrentMealForm()" title="Clear this meal slot" style="font-size:0.75rem; color:var(--danger); border:1px solid var(--border);">
+            <i class="fa-solid fa-xmark"></i> Clear Dish
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Meal Form Fields -->
+      <input type="hidden" id="editActiveMealType" value="breakfast" />
+      
+      <div style="margin-bottom:12px;">
+        <label class="form-label" style="font-weight:600; margin-bottom:4px;">Dish / Recipe Name</label>
+        <input type="text" id="editMealName" class="form-input" placeholder="e.g. Pancakes or Grilled Chicken Wrap" style="padding-left:12px; font-weight:600;" />
+      </div>
+
+      <div style="margin-bottom:12px;">
+        <label class="form-label" style="font-weight:600; margin-bottom:4px;">Short Description</label>
+        <input type="text" id="editMealDesc" class="form-input" placeholder="e.g. Fluffy golden pancakes with light honey drizzle" style="padding-left:12px;" />
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:14px;">
+        <div>
+          <label class="form-label" style="font-weight:600; margin-bottom:6px; font-size:0.75rem;">Calories (kcal)</label>
+          <input type="number" id="editMealCalories" class="form-input" placeholder="450" style="padding-left:10px;" />
+        </div>
+        <div>
+          <label class="form-label" style="font-weight:600; margin-bottom:6px; font-size:0.75rem;">Est. Cost (RM)</label>
+          <input type="number" step="0.5" id="editMealCost" class="form-input" placeholder="8.50" style="padding-left:10px;" />
+        </div>
+        <div>
+          <label class="form-label" style="font-weight:600; margin-bottom:6px; font-size:0.75rem;">Prep Time (mins)</label>
+          <input type="number" id="editMealPrep" class="form-input" placeholder="25" style="padding-left:10px;" />
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-bottom:14px;">
+        <div>
+          <label class="form-label" style="font-weight:600; margin-bottom:6px; font-size:0.75rem;">Protein (g)</label>
+          <input type="number" id="editMealProtein" class="form-input" placeholder="35" style="padding-left:10px;" />
+        </div>
+        <div>
+          <label class="form-label" style="font-weight:600; margin-bottom:6px; font-size:0.75rem;">Carbs (g)</label>
+          <input type="number" id="editMealCarbs" class="form-input" placeholder="40" style="padding-left:10px;" />
+        </div>
+        <div>
+          <label class="form-label" style="font-weight:600; margin-bottom:6px; font-size:0.75rem;">Fat (g)</label>
+          <input type="number" id="editMealFat" class="form-input" placeholder="15" style="padding-left:10px;" />
+        </div>
+      </div>
+
+      <div style="margin-bottom:10px;">
+        <label class="form-label" style="font-weight:600; margin-bottom:6px;">Key Ingredients (comma-separated)</label>
+        <input type="text" id="editMealIngredients" class="form-input" placeholder="e.g. Chicken breast, Garlic, Butter, Broccoli" style="padding-left:12px;" />
+      </div>
+    </div>
+    <div class="custom-modal-footer">
+      <button class="btn btn-secondary" onclick="closeEditDayModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDayEdits()"><i class="fa-solid fa-floppy-disk"></i> Save Day Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Dedicated Cookbook Recipe Picker Modal -->
+<div id="cookbookPickerModal" class="custom-modal-overlay" style="display:none;">
+  <div class="custom-modal-card" style="max-width:560px;">
+    <div class="custom-modal-header">
+      <h3><span><i class="fa-solid fa-book-open"></i></span> <span id="cookbookPickerTitle">Select Recipe from Cookbook</span></h3>
+      <button class="btn btn-ghost btn-sm" onclick="closeCookbookPickerModal()" style="font-size:1.2rem; line-height:1; padding:4px 8px;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="custom-modal-body">
+      <div style="margin-bottom:14px;">
+        <input type="text" id="cookbookSearchInput" class="form-input" placeholder="<i class="fa-solid fa-magnifying-glass"></i> Search cookbook recipes by name or ingredient..." oninput="filterCookbookPickerList(this.value)" style="padding-left:12px;" />
+      </div>
+      <div id="cookbookPickerListContainer" style="max-height:360px; overflow-y:auto; display:flex; flex-direction:column; gap:10px;">
+        <!-- Recipes dynamically rendered -->
+      </div>
+    </div>
+    <div class="custom-modal-footer">
+      <button class="btn btn-secondary" onclick="closeCookbookPickerModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/auth.js?v=18"></script>
+<script src="/static/js/inventory.js?v=18"></script>
+<script src="/static/js/meal_planner.js?v=18"></script>
+<script src="/static/js/weekly_planner.js?v=18"></script>
+<script src="/static/js/cookbook.js?v=18"></script>
+<script src="/static/js/profile.js?v=18"></script>
+<script src="/static/js/quicklist.js?v=18"></script>
 
 <script>
   const user = JSON.parse(sessionStorage.getItem('user')||'null');
@@ -514,26 +918,37 @@
   const saved=localStorage.getItem('theme')||'light';
   document.documentElement.setAttribute('data-theme',saved);
   const themeBtn=document.getElementById('themeToggle');
-  themeBtn.textContent=saved==='dark'?'☀️':'🌙';
+  themeBtn.innerHTML=saved==='dark'?'<i class="fa-solid fa-sun"></i>':'<i class="fa-solid fa-moon"></i>';
   themeBtn.onclick=()=>{
     const next=document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark';
     document.documentElement.setAttribute('data-theme',next);
     localStorage.setItem('theme',next);
-    themeBtn.textContent=next==='dark'?'☀️':'🌙';
+    themeBtn.innerHTML=next==='dark'?'<i class="fa-solid fa-sun"></i>':'<i class="fa-solid fa-moon"></i>';
   };
 
-  const tabTitles={inventory:' My Fridge',planner:'Meal Engine',cookbook:'Cookbook',quicklist:'Quick List',profile:'My Profile', 'edit-profile': 'Edit Profile'};
-  function switchTab(name,el){
+  const tabTitles={inventory:' My Fridge',planner:'Meal Engine','weekly-planner':'Meal Planner',cookbook:'Cookbook',quicklist:'Quick List',profile:'My Profile', 'edit-profile': 'Edit Profile'};
+  window.switchTab = function(name, el){
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-    document.getElementById('tab-'+name).classList.add('active');
-    if (el) el.classList.add('active');
-    document.getElementById('topbarTitle').textContent=tabTitles[name];
+    const targetPanel = document.getElementById('tab-'+name);
+    if (targetPanel) targetPanel.classList.add('active');
+    
+    if (el) {
+      el.classList.add('active');
+    } else {
+      const matchBtn = Array.from(document.querySelectorAll('.nav-item')).find(b => b.getAttribute('onclick')?.includes(`'${name}'`));
+      if (matchBtn) matchBtn.classList.add('active');
+    }
+    
+    const titleEl = document.getElementById('topbarTitle');
+    if (titleEl) titleEl.textContent = tabTitles[name] || name;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    if(name==='cookbook') loadCookbook();
-    if(name==='quicklist') loadQuickList();
-    if(name==='profile') loadProfile();
-  }
+    if(name==='cookbook' && typeof loadCookbook === 'function') loadCookbook();
+    if(name==='quicklist' && typeof loadQuickList === 'function') loadQuickList();
+    if(name==='profile' && typeof loadProfile === 'function') loadProfile();
+    if(name==='weekly-planner' && typeof loadSavedMealPlans === 'function') loadSavedMealPlans();
+  };
+  function switchTab(name, el) { window.switchTab(name, el); }
   function showLogoutModal() { document.getElementById('logoutModal').style.display = 'flex'; }
   function closeLogoutModal() { document.getElementById('logoutModal').style.display = 'none'; }
   function handleLogout(){ clearToken(); sessionStorage.clear(); window.location.href='/'; }
@@ -548,7 +963,7 @@
   const mobileMenuBtn = document.getElementById('mobileMenuBtn');
   const sidebar = document.querySelector('.sidebar');
 
-  // Toggle sidebar slide when clicking the ☰ button
+  // Toggle sidebar slide when clicking the <i class="fa-solid fa-bars"></i> button
   if (mobileMenuBtn && sidebar) {
     mobileMenuBtn.addEventListener('click', (e) => {
       e.stopPropagation(); // Prevents instant closing
@@ -583,12 +998,12 @@
       hb.style.background = 'var(--accent-soft)';
       hb.style.borderColor = 'var(--accent)';
       hb.style.color = 'var(--accent)';
-      hb.textContent = '🏃 Health Mode ON — Goal: ' + (user.health_goal||'—') + ' | BMI: ' + (user.bmi||'—');
+      hb.textContent = '<i class="fa-solid fa-person-running"></i> Health Mode ON — Goal: ' + (user.health_goal||'—') + ' | BMI: ' + (user.bmi||'—');
     } else {
       hb.style.background = 'var(--bg-secondary)';
       hb.style.borderColor = 'var(--border)';
       hb.style.color = 'var(--text-muted)';
-      hb.textContent = '😋 Chill Mode — No health optimization applied';
+      hb.textContent = '<i class="fa-solid fa-face-smile-beam"></i> Chill Mode — No health optimization applied';
     }
   }
   updateHealthBadge();
@@ -615,3 +1030,6 @@
 </script>
 </body>
 </html>
+
+
+
