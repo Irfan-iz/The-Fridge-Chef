@@ -8,40 +8,11 @@ let lastOptimizationTelemetry = null;
 
 // =============================================
 // SMART HYBRID CULINARY IMAGE ENGINE
-// =============================================
-const CULINARY_IMAGE_DATABASE = [
-  // Malaysian & Asian Specific Staples
-  { keywords: ['nasi lemak', 'sambal ikan', 'sambal telur', 'sambal sotong'], url: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['rendang', 'daging rendang', 'ayam rendang'], url: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['curry', 'kari', 'masak lemak', 'gulai', 'kurma'], url: 'https://images.unsplash.com/photo-1588166524941-3bf61a9c41db?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['fried rice', 'nasi goreng', 'rice bowl', 'nasi'], url: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['fritter', 'fritters', 'cucur', 'bakwan', 'tempura', 'gorengan'], url: 'https://images.unsplash.com/photo-1541592106381-b31e9677c0e5?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['stir fry', 'stir-fry', 'tumis', 'goreng', 'paprik', 'chilli', 'pepper', 'cabbage', 'cauliflower', 'kangkung', 'sawi'], url: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['noodle', 'noodles', 'mee', 'bihun', 'kuey teow', 'laksa', 'ramen', 'pasta', 'spaghetti'], url: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['soup', 'sup', 'broth', 'tomyum', 'tom yum', 'soto'], url: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['chicken', 'ayam', 'poultry', 'roast chicken', 'ayam bakar', 'ayam goreng'], url: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['beef', 'daging', 'steak', 'meat'], url: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['fish', 'ikan', 'salmon', 'prawn', 'prawns', 'udang', 'squid', 'sotong', 'seafood'], url: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['egg', 'eggs', 'telur', 'omelette', 'omelet', 'scramble'], url: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['tofu', 'tauhu', 'tempeh', 'tempe', 'vegetarian', 'vegan'], url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['salad', 'kerabu', 'ulam', 'greens'], url: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=700&auto=format&fit=crop&q=80' },
-  { keywords: ['roti', 'flatbread', 'canai', 'wrap', 'pancake', 'toast'], url: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=700&auto=format&fit=crop&q=80' }
-];
-
-const DEFAULT_CULINARY_FALLBACK = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&auto=format&fit=crop&q=80';
-
 function getRecipeImageUrl(recipeName = '', culturalTag = '', description = '') {
-  const query = `${recipeName} ${culturalTag} ${description}`.toLowerCase();
-  
-  // 1. Check curated high-definition culinary database first
-  for (const entry of CULINARY_IMAGE_DATABASE) {
-    if (entry.keywords.some(k => query.includes(k))) {
-      return entry.url;
-    }
-  }
-  
-  // 2. AI Food Photography synthesis for unique dishes
-  const cleanPrompt = encodeURIComponent(`delicious appetizing plated ${recipeName} gourmet food photography 4k`);
+  // Use Pollinations AI to generate an accurate, bespoke image for every single dish
+  // Adding explicit culinary keywords to help Stable Diffusion understand Asian/Malaysian food
+  const prompt = `close-up authentic plated ${recipeName}, ${culturalTag}, ${description}. appetizing food photography, highly detailed, 4k, restaurant quality`;
+  const cleanPrompt = encodeURIComponent(prompt);
   return `https://image.pollinations.ai/prompt/${cleanPrompt}?width=700&height=450&nologo=true`;
 }
 window.getRecipeImageUrl = getRecipeImageUrl;
