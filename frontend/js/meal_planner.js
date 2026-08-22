@@ -8,12 +8,44 @@ let lastOptimizationTelemetry = null;
 
 // =============================================
 // SMART HYBRID CULINARY IMAGE ENGINE
+const WIKI_CULINARY_DATABASE = [
+  { keywords: ['nasi lemak'], url: 'https://upload.wikimedia.org/wikipedia/commons/5/55/Nasi_Lemak_dengan_Chili_Nasi_Lemak_dan_Sotong_Pedas%2C_di_Penang_Summer_Restaurant.jpg' },
+  { keywords: ['nasi goreng', 'fried rice'], url: 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Nasi_Goreng_Kampung_%2811967588375%29.jpg' },
+  { keywords: ['rendang', 'daging'], url: 'https://upload.wikimedia.org/wikipedia/commons/7/70/Rendang_daging_sapi_asli_Padang.JPG' },
+  { keywords: ['curry', 'kari', 'gulai', 'masak lemak'], url: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Taj_Mahal_-_Lamb_Curry_Madras.jpg' },
+  { keywords: ['laksa'], url: 'https://upload.wikimedia.org/wikipedia/commons/1/1c/Nyonya_Laksa.jpg' },
+  { keywords: ['omelette', 'telur', 'egg'], url: 'https://upload.wikimedia.org/wikipedia/commons/4/4d/Gorgonzola_%2B_Bacon_Omelette_%40_Omelegg_%40_Amsterdam_%2816600947041%29.jpg' },
+  { keywords: ['fried chicken', 'ayam goreng'], url: 'https://upload.wikimedia.org/wikipedia/commons/2/2c/Fried-Chicken-Set.jpg' },
+  { keywords: ['satay', 'sate'], url: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Sate_Udang.JPG' },
+  { keywords: ['roti canai', 'roti', 'canai', 'flatbread'], url: 'https://upload.wikimedia.org/wikipedia/commons/1/19/YosriRotiCanai.jpg' },
+  { keywords: ['soup', 'sup', 'broth', 'tomyum'], url: 'https://upload.wikimedia.org/wikipedia/commons/f/ff/Asparagus_soup_%28spargelsuppe%29.jpg' },
+  { keywords: ['noodle', 'mee', 'bihun', 'kuey teow'], url: 'https://upload.wikimedia.org/wikipedia/commons/b/b5/Dalian_Liaoning_China_Noodlemaker-01.jpg' },
+  { keywords: ['beef'], url: 'https://upload.wikimedia.org/wikipedia/commons/6/60/Standing-rib-roast.jpg' },
+  { keywords: ['chicken', 'ayam'], url: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['fish', 'ikan', 'prawn', 'sotong', 'seafood'], url: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['salad', 'kerabu', 'ulam', 'cabbage', 'vegetable'], url: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['stir fry', 'goreng', 'tumis', 'paprik'], url: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=700&auto=format&fit=crop&q=80' },
+  { keywords: ['nasi', 'rice'], url: 'https://images.unsplash.com/photo-1536304929831-ee1ca9d44906?w=700&auto=format&fit=crop&q=80' }
+];
+
 function getRecipeImageUrl(recipeName = '', culturalTag = '', description = '') {
-  // Use Pollinations AI to generate an accurate, bespoke image for every single dish
-  // Adding explicit culinary keywords to help Stable Diffusion understand Asian/Malaysian food
-  const prompt = `close-up authentic plated ${recipeName}, ${culturalTag}, ${description}. appetizing food photography, highly detailed, 4k, restaurant quality`;
-  const cleanPrompt = encodeURIComponent(prompt);
-  return `https://image.pollinations.ai/prompt/${cleanPrompt}?width=700&height=450&nologo=true`;
+  const query = \\ \ \\.toLowerCase();
+  
+  let bestMatch = null;
+  let maxKeywordLength = 0;
+  
+  for (const entry of WIKI_CULINARY_DATABASE) {
+    for (const keyword of entry.keywords) {
+      if (query.includes(keyword) && keyword.length > maxKeywordLength) {
+        maxKeywordLength = keyword.length;
+        bestMatch = entry.url;
+      }
+    }
+  }
+  
+  if (bestMatch) return bestMatch;
+  
+  return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&auto=format&fit=crop&q=80';
 }
 window.getRecipeImageUrl = getRecipeImageUrl;
 
