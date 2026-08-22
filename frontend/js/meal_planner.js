@@ -29,7 +29,7 @@ const WIKI_CULINARY_DATABASE = [
 ];
 
 function getRecipeImageUrl(recipeName = '', culturalTag = '', description = '') {
-  const query = \\ \ \\.toLowerCase();
+  const query = `${recipeName} ${culturalTag} ${description}`.toLowerCase();
   
   let bestMatch = null;
   let maxKeywordLength = 0;
