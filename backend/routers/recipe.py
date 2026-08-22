@@ -42,6 +42,7 @@ def get_recipe_ideas(req: RecipeIdeasRequest):
     live_dosm_prices = '\n'.join(filtered_lines[:12])
 
     prompt = f"""Malaysian AI chef. Generate 5 recipe ideas as JSON.
+CRITICAL RULE: DO NOT invent fake or weird dishes. ONLY generate real, authentic, well-known dishes (especially Malaysian/Asian classics) that actually exist in real life. If ingredients don't perfectly match a real dish, suggest a real dish and list the missing ingredients.
 
 Ingredients: {req.ingredients}
 Budget: RM{req.min_budget:.0f}-{req.max_budget:.0f} | Calories: {cal_instruction} | Prep: {prep_instruction} | Halal: {req.require_halal} | Cuisine: {req.cuisine_instruction} | Meal: {req.meal_category}
