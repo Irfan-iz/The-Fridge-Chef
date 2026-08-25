@@ -2,10 +2,28 @@ import io
 import numpy as np
 from PIL import Image
 from fastapi import APIRouter, HTTPException, UploadFile, File
+from pydantic import BaseModel
 from config import CLASS_NAMES, logger
-from ai_models import interpreter, input_details, output_details, gemini_model
+from ai_models import interpreter, input_details, output_details, gemini_model, text_model
 
 router = APIRouter()
+
+class ValidateIngredientRequest(BaseModel):
+    ingredient: str
+
+@router.post("/api/validate_ingredient")
+async def validate_ingredient(req: ValidateIngredientRequest):
+    try:
+        prompt = f'Is "{req.ingredient}" a valid real-world food ingredient or culinary item (like meat, vegetable, fruit, spice)? Answer strictly "YES" or "NO".'
+        response = text_model.generate_content(prompt)
+        text = response.text.strip().upper()
+        if "YES" in text:
+            return {"valid": True}
+        return {"valid": False}
+    except Exception as e:
+        logger.error(f"Validation error: {e}")
+        return {"valid": True}
+
 
 def preprocess_image(image):
     input_shape = input_details[0]['shape']

@@ -782,6 +782,9 @@ function renderActiveWeeklySchedule() {
                 </div>
               </div>
               <div style="display:flex; align-items:center; gap:5px;">
+                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); logMealForToday(${idx}, '${mealType}', 'active')" title="Eat this meal today (Logs to Analytics)" style="font-size:0.7rem; padding:3px 7px; border-radius:5px; font-weight:700;">
+                  <i class="fa-solid fa-utensils"></i> Eat
+                </button>
                 <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openCookbookPickerModal(${idx}, '${mealType}', 'active')" title="Pick from Cookbook" style="font-size:0.7rem; padding:3px 7px; border-radius:5px; font-weight:600;">
                   <i class="fa-solid fa-book-open"></i>
                 </button>
@@ -1772,5 +1775,72 @@ window.openCookbookPickerModal = openCookbookPickerModal;
 window.closeCookbookPickerModal = closeCookbookPickerModal;
 window.renderCookbookPickerList = renderCookbookPickerList;
 window.filterCookbookPickerList = filterCookbookPickerList;
+
+/**
+ * Log a meal directly to Today's Analytics from the active meal plan schedule
+ */
+async function logMealForToday(idx, mealType, source) {
+  let meal = null;
+  if (source === 'generator' && currentMealPlan && currentMealPlan.days) {
+      meal = currentMealPlan.days[idx].meals[mealType];
+  } else if (source === 'active') {
+      const activeStr = localStorage.getItem('activeWeeklyPlan');
+      if (activeStr) {
+          try {
+              const parsedPlan = JSON.parse(activeStr);
+              if (parsedPlan && parsedPlan.days) {
+                  meal = parsedPlan.days[idx].meals[mealType];
+              }
+          } catch(e) {}
+      }
+  }
+  
+  if (!meal || !meal.name || meal.name === 'Empty Meal Slot') {
+    return showToast("Cannot log an empty meal slot.", "error");
+  }
+  
+  const userStr = sessionStorage.getItem('user');
+  if (!userStr) return showToast("User not found. Please log in.", "error");
+  const user = JSON.parse(userStr);
+  
+  try {
+     showLoading("Logging meal for today...");
+     const res = await authFetch('/api/meal/log', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            user_id: user.user_id,
+            recipe_name: meal.name,
+            calories: parseInt(meal.calories) || 0,
+            protein: parseInt(meal.protein_g) || 0,
+            carbs: parseInt(meal.carbs_g) || 0,
+            fat: parseInt(meal.fat_g) || 0,
+            cost_rm: parseFloat(meal.est_cost_rm) || 0.0
+        })
+     });
+     
+     hideLoading();
+     if (res.ok) {
+         showToast("Meal logged for today! Analytics updated.", "success");
+         // The button was clicked, maybe we can disable it locally (reloads will reset it, which is fine)
+         if (event && event.currentTarget) {
+            const btn = event.currentTarget;
+            btn.innerHTML = '<i class="fa-solid fa-check-double"></i> Eaten';
+            btn.className = 'btn btn-success btn-sm';
+            btn.disabled = true;
+            btn.style.background = 'var(--success)';
+            btn.style.borderColor = 'var(--success)';
+         }
+     } else {
+         const data = await res.json();
+         showToast(data.detail || "Failed to log meal.", "error");
+     }
+  } catch(e) {
+     hideLoading();
+     showToast("Error connecting to server.", "error");
+  }
+}
+
+window.logMealForToday = logMealForToday;
 window.selectRecipeFromCookbookPicker = selectRecipeFromCookbookPicker;
 

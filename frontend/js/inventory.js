@@ -393,21 +393,50 @@ function addAllGeminiItems() {
 }
 
 // ---- MANUAL ADD ----
-function addManual() {
+async function addManual() {
   const input = document.getElementById('manualInput');
   if (!input) return;
   const name = input.value.trim();
   if (!name) return showToast('Please type an ingredient name.', 'error');
-  const formatted = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
-  addToFridge(formatted, null);
-  input.value = '';
+
+  const addBtn = document.querySelector('#addManualView button.btn-primary');
+  if (addBtn) {
+    addBtn.disabled = true;
+    addBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking...';
+  }
+
+  try {
+    const res = await authFetch('/api/validate_ingredient', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ingredient: name })
+    });
+    const data = await res.json();
+    
+    if (!data.valid) {
+      showToast(`"${name}" doesn't seem to be a valid food ingredient.`, 'error');
+      if (addBtn) {
+        addBtn.disabled = false;
+        addBtn.innerHTML = 'Add to Fridge';
+      }
+      return;
+    }
+    
+    const formatted = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+    addToFridge(formatted, null);
+    input.value = '';
+  } catch (e) {
+    // Fallback: add anyway if validation server fails
+    const formatted = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+    addToFridge(formatted, null);
+    input.value = '';
+  } finally {
+    if (addBtn) {
+      addBtn.disabled = false;
+      addBtn.innerHTML = 'Add to Fridge';
+    }
+  }
 }
 
 // ---- INIT ----
 renderFridge();
-
-// Allow Enter key in manual input
-setTimeout(() => {
-  const input = document.getElementById('manualInput');
-  if (input) input.addEventListener('keydown', e => { if (e.key === 'Enter') addManual(); });
-}, 500);
