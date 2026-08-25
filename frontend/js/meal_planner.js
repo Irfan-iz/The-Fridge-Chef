@@ -406,8 +406,15 @@ function renderFullRecipe(data) {
 
     ${missing.length?`<div class="card" style="margin-bottom:20px; background:var(--bg-secondary);">
       <div class="card-header"><div class="card-title">Suggested Inventory Additions</div></div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
-        ${missing.map(m=>`<span class="tag" style="background:var(--bg-card); color:var(--text-primary); border:1px solid var(--border);">+ ${m}</span>`).join('')}
+      <div class="ingredients-list">
+        ${missing.map(m=>`
+          <label class="checklist-item">
+            <div style="display:flex; align-items:center;">
+              <input type="checkbox" onchange="this.parentElement.parentElement.classList.toggle('checked')" />
+              <span>${m}</span>
+            </div>
+          </label>
+        `).join('')}
       </div>
     </div>`:''}
 
