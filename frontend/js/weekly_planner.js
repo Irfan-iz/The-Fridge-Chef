@@ -342,18 +342,16 @@ function renderMealPlan(data) {
               <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
                 <span class="planner-meal-badge ${mealType}">${mealLabels[mealType]}</span>
                 <div style="flex:1; min-width:0;">
-                  <div style="font-weight:700; font-size:0.92rem; color:var(--text-primary); font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  <div class="meal-name-text" style="font-weight:700; font-size:0.92rem; color:var(--text-primary); font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                     ${escapeHtmlMP(meal.name)}
                   </div>
-                  <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">
+                  <div class="meal-stats-text" style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">
                     <i class="fa-regular fa-clock"></i> ${meal.prep_time || 20}m · <i class="fa-solid fa-fire"></i> ${meal.calories || 0} kcal · <i class="fa-solid fa-sack-dollar"></i> RM ${parseFloat(meal.est_cost_rm || 0).toFixed(2)} ${meal.protein_g ? `· <i class="fa-solid fa-drumstick-bite"></i> ${meal.protein_g}g pro` : ''}
                   </div>
                 </div>
               </div>
               <div style="display:flex; align-items:center; gap:5px;">
-                <button class="btn btn-secondary btn-sm" onclick="openCookbookPickerModal(${idx}, '${mealType}', 'generator')" title="Pick from Cookbook" style="font-size:0.7rem; padding:3px 7px; border-radius:5px; font-weight:600;">
-                  <i class="fa-solid fa-book-open"></i>
-                </button>
+                
                 <button class="btn btn-ghost btn-sm" onclick="openEditDayModalWithMeal(${idx}, '${mealType}', 'generator')" title="Edit Meal" style="font-size:0.7rem; padding:3px 7px; border:1px solid var(--border); border-radius:5px; color:var(--text-primary);">
                   <i class="fa-solid fa-pen"></i>
                 </button>
@@ -371,9 +369,7 @@ function renderMealPlan(data) {
                 <span style="font-size:0.82rem; color:var(--text-muted); font-style:italic;">Not planned yet</span>
               </div>
               <div style="display:flex; align-items:center; gap:6px;">
-                <button class="btn btn-secondary btn-sm" onclick="openCookbookPickerModal(${idx}, '${mealType}', 'generator')" style="font-size:0.7rem; padding:2px 8px; border-radius:5px; font-weight:600;">
-                  <i class="fa-solid fa-book-open"></i> Cookbook
-                </button>
+                
                 <button class="btn btn-ghost btn-sm" onclick="openEditDayModalWithMeal(${idx}, '${mealType}', 'generator')" style="font-size:0.7rem; padding:2px 8px; border:1px solid var(--border); border-radius:5px; color:var(--accent); font-weight:600;">
                   + Add
                 </button>
@@ -773,10 +769,10 @@ function renderActiveWeeklySchedule() {
               <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
                 <span class="planner-meal-badge ${mealType}">${mealLabels[mealType]}</span>
                 <div style="flex:1; min-width:0;">
-                  <div style="font-weight:700; font-size:0.92rem; color:var(--text-primary); font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  <div class="meal-name-text" style="font-weight:700; font-size:0.92rem; color:var(--text-primary); font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
                     ${escapeHtmlMP(meal.name)}
                   </div>
-                  <div style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">
+                  <div class="meal-stats-text" style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">
                     <i class="fa-regular fa-clock"></i> ${meal.prep_time || 20}m · <i class="fa-solid fa-fire"></i> ${meal.calories || 0} kcal · <i class="fa-solid fa-sack-dollar"></i> RM ${parseFloat(meal.est_cost_rm || 0).toFixed(2)} ${meal.protein_g ? `· <i class="fa-solid fa-drumstick-bite"></i> ${meal.protein_g}g pro` : ''}
                   </div>
                 </div>
@@ -785,9 +781,7 @@ function renderActiveWeeklySchedule() {
                 <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); logMealForToday(${idx}, '${mealType}', 'active')" title="Eat this meal today (Logs to Analytics)" style="font-size:0.7rem; padding:3px 7px; border-radius:5px; font-weight:700;">
                   <i class="fa-solid fa-utensils"></i> Eat
                 </button>
-                <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); openCookbookPickerModal(${idx}, '${mealType}', 'active')" title="Pick from Cookbook" style="font-size:0.7rem; padding:3px 7px; border-radius:5px; font-weight:600;">
-                  <i class="fa-solid fa-book-open"></i>
-                </button>
+                
                 <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openEditDayModalWithMeal(${idx}, '${mealType}', 'active')" title="Edit Meal" style="font-size:0.7rem; padding:3px 7px; border:1px solid var(--border); border-radius:5px; color:var(--text-primary);">
                   <i class="fa-solid fa-pen"></i>
                 </button>
@@ -805,9 +799,7 @@ function renderActiveWeeklySchedule() {
                 <span style="font-size:0.82rem; color:var(--text-muted); font-style:italic;">Not planned yet</span>
               </div>
               <div style="display:flex; align-items:center; gap:6px;">
-                <button class="btn btn-secondary btn-sm" onclick="openCookbookPickerModal(${idx}, '${mealType}', 'active')" style="font-size:0.7rem; padding:2px 8px; border-radius:5px; font-weight:600;">
-                  <i class="fa-solid fa-book-open"></i> Cookbook
-                </button>
+                
                 <button class="btn btn-ghost btn-sm" onclick="openEditDayModalWithMeal(${idx}, '${mealType}', 'active')" style="font-size:0.7rem; padding:2px 8px; border:1px solid var(--border); border-radius:5px; color:var(--accent); font-weight:600;">
                   + Add
                 </button>
@@ -1843,4 +1835,6 @@ async function logMealForToday(idx, mealType, source) {
 
 window.logMealForToday = logMealForToday;
 window.selectRecipeFromCookbookPicker = selectRecipeFromCookbookPicker;
+
+
 

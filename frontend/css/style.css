@@ -587,7 +587,6 @@ body {
 .recipe-tags {
   display: flex;
   gap: 6px;
-  flex-wrap: wrap;
   margin-bottom: 12px;
 }
 .tag {
@@ -2103,7 +2102,6 @@ details[open] > summary { color: var(--accent); margin-bottom: 8px; }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
   gap: 8px;
   padding: 10px 12px;
   margin-bottom: 8px;
@@ -2510,4 +2508,25 @@ details[open] > summary { color: var(--accent); margin-bottom: 8px; }
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .planner-meal-row {
+    padding: 8px 8px !important;
+    gap: 6px !important;
+  }
+  .planner-meal-badge {
+    padding: 3px 6px !important;
+    font-size: 0.65rem !important;
+  }
+  .planner-meal-row .meal-name-text {
+    font-size: 0.85rem !important;
+  }
+  .planner-meal-row .meal-stats-text {
+    font-size: 0.65rem !important;
+  }
+  .planner-meal-row button {
+    padding: 4px 6px !important;
+    font-size: 0.7rem !important;
+  }
 }
