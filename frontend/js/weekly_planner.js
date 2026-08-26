@@ -338,26 +338,26 @@ function renderMealPlan(data) {
         const meal = meals[mealType];
         if (meal && meal.name && meal.name.trim() !== '' && meal.name !== 'Empty Meal Slot') {
           html += `
-            <div class="planner-meal-row">
-              <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+                        <div class="planner-meal-row card-style-row" style="flex-direction: column; align-items: stretch; gap: 8px; padding: 12px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
                 <span class="planner-meal-badge ${mealType}">${mealLabels[mealType]}</span>
-                <div style="flex:1; min-width:0;">
-                  <div class="meal-name-text" style="font-weight:700; font-size:0.92rem; color:var(--text-primary); font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                    ${escapeHtmlMP(meal.name)}
-                  </div>
-                  <div class="meal-stats-text" style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">
-                    <i class="fa-regular fa-clock"></i> ${meal.prep_time || 20}m · <i class="fa-solid fa-fire"></i> ${meal.calories || 0} kcal · <i class="fa-solid fa-sack-dollar"></i> RM ${parseFloat(meal.est_cost_rm || 0).toFixed(2)} ${meal.protein_g ? `· <i class="fa-solid fa-drumstick-bite"></i> ${meal.protein_g}g pro` : ''}
-                  </div>
+                <div style="display:flex; align-items:center; gap:5px;">
+                  <button class="btn btn-ghost btn-sm" onclick="openEditDayModalWithMeal(${idx}, '${mealType}', 'generator')" title="Edit Meal" style="font-size:0.7rem; padding:3px 7px; border:1px solid var(--border); border-radius:5px; color:var(--text-primary);">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button class="btn btn-ghost btn-sm" onclick="clearMealSlot(${idx}, '${mealType}', 'generator')" title="Clear this meal slot" style="font-size:0.7rem; padding:3px 6px; color:var(--danger);">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
                 </div>
               </div>
-              <div style="display:flex; align-items:center; gap:5px;">
-                
-                <button class="btn btn-ghost btn-sm" onclick="openEditDayModalWithMeal(${idx}, '${mealType}', 'generator')" title="Edit Meal" style="font-size:0.7rem; padding:3px 7px; border:1px solid var(--border); border-radius:5px; color:var(--text-primary);">
-                  <i class="fa-solid fa-pen"></i>
-                </button>
-                <button class="btn btn-ghost btn-sm" onclick="clearMealSlot(${idx}, '${mealType}', 'generator')" title="Clear this meal slot" style="font-size:0.7rem; padding:3px 6px; color:var(--danger);">
-                  <i class="fa-solid fa-xmark"></i>
-                </button>
+              <div class="meal-name-text" style="font-weight:700; font-size:0.95rem; color:var(--text-primary); font-style:italic; line-height:1.3;">
+                ${escapeHtmlMP(meal.name)}
+              </div>
+              <div class="meal-stats-text" style="font-size:0.75rem; color:var(--text-muted); display:flex; flex-wrap:wrap; gap:6px 12px;">
+                <span><i class="fa-regular fa-clock"></i> ${meal.prep_time || 20}m</span>
+                <span><i class="fa-solid fa-fire"></i> ${meal.calories || 0} kcal</span>
+                <span><i class="fa-solid fa-sack-dollar"></i> RM ${parseFloat(meal.est_cost_rm || 0).toFixed(2)}</span>
+                ${meal.protein_g ? `<span><i class="fa-solid fa-drumstick-bite"></i> ${meal.protein_g}g pro</span>` : ''}
               </div>
             </div>`;
         } else {
@@ -765,29 +765,29 @@ function renderActiveWeeklySchedule() {
         const meal = meals[mealType];
         if (meal && meal.name && meal.name.trim() !== '' && meal.name !== 'Empty Meal Slot') {
           html += `
-            <div class="planner-meal-row">
-              <div style="display:flex; align-items:center; gap:12px; flex:1; min-width:0;">
+                        <div class="planner-meal-row card-style-row" style="flex-direction: column; align-items: stretch; gap: 8px; padding: 12px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
                 <span class="planner-meal-badge ${mealType}">${mealLabels[mealType]}</span>
-                <div style="flex:1; min-width:0;">
-                  <div class="meal-name-text" style="font-weight:700; font-size:0.92rem; color:var(--text-primary); font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                    ${escapeHtmlMP(meal.name)}
-                  </div>
-                  <div class="meal-stats-text" style="font-size:0.72rem; color:var(--text-muted); margin-top:2px;">
-                    <i class="fa-regular fa-clock"></i> ${meal.prep_time || 20}m · <i class="fa-solid fa-fire"></i> ${meal.calories || 0} kcal · <i class="fa-solid fa-sack-dollar"></i> RM ${parseFloat(meal.est_cost_rm || 0).toFixed(2)} ${meal.protein_g ? `· <i class="fa-solid fa-drumstick-bite"></i> ${meal.protein_g}g pro` : ''}
-                  </div>
+                <div style="display:flex; align-items:center; gap:5px;">
+                  <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); logMealForToday(${idx}, '${mealType}', 'active')" title="Eat this meal today (Logs to Analytics)" style="font-size:0.75rem; padding:4px 10px; border-radius:6px; font-weight:700;">
+                    <i class="fa-solid fa-utensils"></i> Eat
+                  </button>
+                  <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openEditDayModalWithMeal(${idx}, '${mealType}', 'active')" title="Edit Meal" style="font-size:0.7rem; padding:3px 7px; border:1px solid var(--border); border-radius:5px; color:var(--text-primary);">
+                    <i class="fa-solid fa-pen"></i>
+                  </button>
+                  <button class="btn btn-ghost btn-sm" onclick="clearMealSlot(${idx}, '${mealType}', 'active')" title="Clear this meal slot" style="font-size:0.7rem; padding:3px 6px; color:var(--danger);">
+                    <i class="fa-solid fa-xmark"></i>
+                  </button>
                 </div>
               </div>
-              <div style="display:flex; align-items:center; gap:5px;">
-                <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); logMealForToday(${idx}, '${mealType}', 'active')" title="Eat this meal today (Logs to Analytics)" style="font-size:0.7rem; padding:3px 7px; border-radius:5px; font-weight:700;">
-                  <i class="fa-solid fa-utensils"></i> Eat
-                </button>
-                
-                <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openEditDayModalWithMeal(${idx}, '${mealType}', 'active')" title="Edit Meal" style="font-size:0.7rem; padding:3px 7px; border:1px solid var(--border); border-radius:5px; color:var(--text-primary);">
-                  <i class="fa-solid fa-pen"></i>
-                </button>
-                <button class="btn btn-ghost btn-sm" onclick="clearMealSlot(${idx}, '${mealType}', 'active')" title="Clear this meal slot" style="font-size:0.7rem; padding:3px 6px; color:var(--danger);">
-                  <i class="fa-solid fa-xmark"></i>
-                </button>
+              <div class="meal-name-text" style="font-weight:700; font-size:0.95rem; color:var(--text-primary); font-style:italic; line-height:1.3;">
+                ${escapeHtmlMP(meal.name)}
+              </div>
+              <div class="meal-stats-text" style="font-size:0.75rem; color:var(--text-muted); display:flex; flex-wrap:wrap; gap:6px 12px;">
+                <span><i class="fa-regular fa-clock"></i> ${meal.prep_time || 20}m</span>
+                <span><i class="fa-solid fa-fire"></i> ${meal.calories || 0} kcal</span>
+                <span><i class="fa-solid fa-sack-dollar"></i> RM ${parseFloat(meal.est_cost_rm || 0).toFixed(2)}</span>
+                ${meal.protein_g ? `<span><i class="fa-solid fa-drumstick-bite"></i> ${meal.protein_g}g pro</span>` : ''}
               </div>
             </div>`;
         } else {
