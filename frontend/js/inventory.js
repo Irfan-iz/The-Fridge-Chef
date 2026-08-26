@@ -174,7 +174,6 @@ function resetScannerPreviews() {
   if (gemPreview) { gemPreview.style.display = 'none'; gemPreview.src = ''; }
 }
 
-// Backward compatibility helper
 function setMode(mode) {
   if (mode === 'manual') {
     switchAddMainTab('manual');
@@ -182,16 +181,6 @@ function setMode(mode) {
     switchAddMainTab('camera');
     switchCameraSubTab('single');
   } else if (mode === 'bulk') {
-    switchAddMainTab('camera');
-    switchCameraSubTab('bulk');
-  } else {
-    switchAddMainTab('camera');
-    switchCameraSubTab('single');
-  }
-} else if (mode === 'upload') {
-    switchAddMainTab('camera');
-    switchCameraSubTab('upload');
-  } else if (mode === 'gemini') {
     switchAddMainTab('camera');
     switchCameraSubTab('bulk');
   } else {
@@ -456,3 +445,4 @@ async function addManual() {
 
 // ---- INIT ----
 renderFridge();
+
