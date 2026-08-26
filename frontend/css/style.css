@@ -2530,3 +2530,73 @@ details[open] > summary { color: var(--accent); margin-bottom: 8px; }
     font-size: 0.7rem !important;
   }
 }
+.saved-plan-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s;
+  gap: 12px;
+}
+.saved-plan-row:hover {
+  border-color: var(--accent);
+}
+.saved-plan-title {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  max-width: 70%;
+}
+.saved-plan-stats {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+.saved-plan-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .saved-plan-row {
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+    padding: 12px 14px;
+  }
+  .saved-plan-actions {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    gap: 4px;
+  }
+  .saved-plan-actions .btn {
+    padding: 4px 6px !important;
+    font-size: 0.7rem !important;
+  }
+  .saved-plan-actions .btn i {
+    font-size: 0.8rem;
+  }
+  .saved-plan-title {
+    max-width: 65%; /* prevent overlap with top-right actions */
+  }
+  .saved-plan-stats {
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hide-mobile-text {
+    display: none !important;
+  }
+}

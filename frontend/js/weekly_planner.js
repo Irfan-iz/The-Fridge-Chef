@@ -622,18 +622,20 @@ async function loadSavedMealPlans() {
     savedMealPlans.forEach(plan => {
       const date = new Date(plan.created_at).toLocaleDateString();
       html += `
-        <div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 18px;margin-bottom:10px;transition:border-color 0.2s;"
-             onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
-          <div>
-            <h4 style="margin:0 0 4px;font-size:0.95rem;font-weight:700;color:var(--text-primary);">${escapeHtmlMP(plan.plan_name)}</h4>
-            <span style="font-size:0.78rem;color:var(--text-muted);">${date} · <i class="fa-solid fa-fire"></i> ${plan.total_calories || 0} kcal · <i class="fa-solid fa-sack-dollar"></i> RM ${parseFloat(plan.total_cost || 0).toFixed(2)}</span>
-          </div>
-          <div style="display:flex;gap:8px;">
-            <button class="btn btn-secondary btn-sm" onclick="setActiveWeeklyPlan(${plan.id})" title="Set as Active Schedule" style="font-size:0.8rem;font-weight:700;"><i class="fa-solid fa-thumbtack"></i> Set Active</button>
-            <button class="btn btn-ghost btn-sm" onclick="viewSavedPlan(${plan.id})" title="View in Generator" style="font-size:1rem;"><i class="fa-solid fa-book-open"></i></button>
-            <button class="btn btn-ghost btn-sm" style="color:var(--danger);font-size:1rem;" onclick="deleteSavedPlan(${plan.id})" title="Delete"><i class="fa-solid fa-trash"></i></button>
-          </div>
-        </div>`;
+                  <div class="saved-plan-row">
+            <div>
+              <h4 class="saved-plan-title">${escapeHtmlMP(plan.plan_name)}</h4>
+              <div class="saved-plan-stats">
+                <span>${date} &middot; <i class="fa-solid fa-fire"></i> ${plan.total_calories || 0} kcal</span>
+                <span><i class="fa-solid fa-sack-dollar"></i> RM ${parseFloat(plan.total_cost || 0).toFixed(2)}</span>
+              </div>
+            </div>
+            <div class="saved-plan-actions">
+              <button class="btn btn-secondary btn-sm" onclick="setActiveWeeklyPlan(${plan.id})" title="Set as Active Schedule" style="font-weight:700;"><i class="fa-solid fa-thumbtack"></i> <span class="hide-mobile-text">Set Active</span></button>
+              <button class="btn btn-ghost btn-sm" onclick="viewSavedPlan(${plan.id})" title="View in Generator"><i class="fa-solid fa-book-open"></i></button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="deleteSavedPlan(${plan.id})" title="Delete"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>`;
     });
     list.innerHTML = html;
   } catch (e) {
