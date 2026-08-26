@@ -132,8 +132,7 @@ function switchAddMainTab(mainTab) {
 function switchCameraSubTab(subTab) {
   activeCameraSubTab = subTab;
 
-  // Toggle Sub-Pill Buttons
-  ['upload', 'single', 'bulk'].forEach(tab => {
+  ['single', 'bulk'].forEach(tab => {
     const btn = document.getElementById('subTab' + tab.charAt(0).toUpperCase() + tab.slice(1));
     if (btn) btn.classList.toggle('active', tab === subTab);
     
@@ -149,10 +148,17 @@ function switchCameraSubTab(subTab) {
 function resetScannerPreviews() {
   capturedBlob = uploadBlob = geminiBlob = null;
   
-  const camPre = document.getElementById('singlePreScanState');
-  if (camPre) camPre.style.display = 'flex';
-  const camActive = document.getElementById('singleActiveStreamState');
-  if (camActive) camActive.style.display = 'none';
+  const singlePre = document.getElementById('singlePreScanState');
+  if (singlePre) singlePre.style.display = 'flex';
+  const singleActive = document.getElementById('singleActiveStreamState');
+  if (singleActive) singleActive.style.display = 'none';
+  const singleUpload = document.getElementById('singleUploadState');
+  if (singleUpload) singleUpload.style.display = 'none';
+
+  const bulkPre = document.getElementById('bulkPreScanState');
+  if (bulkPre) bulkPre.style.display = 'flex';
+  const bulkUpload = document.getElementById('bulkUploadState');
+  if (bulkUpload) bulkUpload.style.display = 'none';
 
   const camPreview = document.getElementById('camera-preview');
   if (camPreview) { camPreview.style.display = 'none'; camPreview.src = ''; }
@@ -163,13 +169,9 @@ function resetScannerPreviews() {
 
   const upPreview = document.getElementById('upload-preview');
   if (upPreview) { upPreview.style.display = 'none'; upPreview.src = ''; }
-  const upScanBtn = document.getElementById('scanUploadBtn');
-  if (upScanBtn) upScanBtn.style.display = 'none';
-
+  
   const gemPreview = document.getElementById('gemini-preview');
   if (gemPreview) { gemPreview.style.display = 'none'; gemPreview.src = ''; }
-  const gemScanBtn = document.getElementById('scanGeminiBtn');
-  if (gemScanBtn) gemScanBtn.style.display = 'none';
 }
 
 // Backward compatibility helper
@@ -177,6 +179,16 @@ function setMode(mode) {
   if (mode === 'manual') {
     switchAddMainTab('manual');
   } else if (mode === 'upload') {
+    switchAddMainTab('camera');
+    switchCameraSubTab('single');
+  } else if (mode === 'bulk') {
+    switchAddMainTab('camera');
+    switchCameraSubTab('bulk');
+  } else {
+    switchAddMainTab('camera');
+    switchCameraSubTab('single');
+  }
+} else if (mode === 'upload') {
     switchAddMainTab('camera');
     switchCameraSubTab('upload');
   } else if (mode === 'gemini') {
@@ -278,10 +290,12 @@ function handleUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
   uploadBlob = file;
+  
+  document.getElementById('singlePreScanState').style.display = 'none';
+  document.getElementById('singleUploadState').style.display = 'block';
+
   const preview = document.getElementById('upload-preview');
   preview.src = URL.createObjectURL(file);
-  preview.style.display = 'block';
-  document.getElementById('scanUploadBtn').style.display = 'block';
 }
 
 async function scanUpload() {
@@ -316,10 +330,12 @@ function handleGeminiPreview(event) {
   const file = event.target.files[0];
   if (!file) return;
   geminiBlob = file;
+  
+  document.getElementById('bulkPreScanState').style.display = 'none';
+  document.getElementById('bulkUploadState').style.display = 'block';
+
   const preview = document.getElementById('gemini-preview');
   preview.src = URL.createObjectURL(file);
-  preview.style.display = 'block';
-  document.getElementById('scanGeminiBtn').style.display = 'block';
 }
 
 async function scanGemini() {
