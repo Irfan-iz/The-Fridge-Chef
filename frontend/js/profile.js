@@ -206,10 +206,10 @@ async function loadProfile() {
           '</tr>';
       });
       recentEl.innerHTML =
-        '<table class="data-table">' +
+        '<div style="overflow-x:auto; width:100%;"><table class="data-table">' +
         '<thead><tr><th>Recipe</th><th>Cal</th><th>Cost</th><th>Date</th></tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
-        '</table>';
+        '</table></div>';
     }
 
     // --- Load Stats Box ---
@@ -452,4 +452,5 @@ let url = '/api/meal/stats/' + userId;
     console.error('Error fetching stats:', e);
   }
 }
+
 

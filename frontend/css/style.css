@@ -2600,3 +2600,10 @@ details[open] > summary { color: var(--accent); margin-bottom: 8px; }
     display: none !important;
   }
 }
+
+@media (max-width: 600px) {
+  .card-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
