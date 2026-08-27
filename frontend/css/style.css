@@ -584,7 +584,7 @@ body {
   color: var(--text-primary);
   margin-bottom: 6px;
 }
-.recipe-tags {
+.recipe-tags { flex-wrap: wrap;
   display: flex;
   gap: 6px;
   margin-bottom: 12px;
@@ -2698,4 +2698,5 @@ details[open] > summary { color: var(--accent); margin-bottom: 8px; }
     white-space: nowrap;
   }
 }
+
 

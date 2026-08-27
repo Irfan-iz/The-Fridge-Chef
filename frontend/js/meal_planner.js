@@ -224,10 +224,13 @@ function renderRecipeCard() {
             const budScore = recipe.budget_efficiency_pct ?? (recipe.optimization_telemetry?.budget_efficiency_pct ?? lastOptimizationTelemetry?.budget_efficiency_pct);
             if (optScore !== undefined && optScore !== null) {
               return `
-                <div style="background: linear-gradient(135deg, rgba(46,125,50,0.1), rgba(200,75,49,0.06)); border: 1px solid rgba(46,125,50,0.25); border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; font-size: 0.75rem; flex-wrap: wrap; gap: 6px;">
-                  <span style="font-weight: 700; color: var(--text-primary);"><i class="fa-solid fa-brain"></i> Optimizer Score: <strong style="color: var(--success);">${optScore}/100</strong></span>
-                  <span style="color: var(--text-muted);">Calorie Match: <strong style="color:var(--success);">${calMatch}%</strong> · Budget Score: <strong style="color:var(--accent);">${budScore}%</strong></span>
-                </div>`;
+                <div style="background: linear-gradient(135deg, rgba(46,125,50,0.1), rgba(200,75,49,0.06)); border: 1px solid rgba(46,125,50,0.25); border-radius: 10px; padding: 12px; margin-bottom: 12px; display: flex; flex-direction: column; align-items: flex-start; font-size: 0.75rem; gap: 6px;">
+                    <span style="font-weight: 700; color: var(--text-primary);"><i class="fa-solid fa-brain"></i> Optimizer Score: <strong style="color: var(--success);">${optScore}/100</strong></span>
+                    <div style="color: var(--text-muted); display: flex; flex-direction: column; gap: 4px;">
+                        <span>Calorie Match: <strong style="color:var(--success);">${calMatch}%</strong></span>
+                        <span>Budget Score: <strong style="color:var(--accent);">${budScore}%</strong></span>
+                    </div>
+                  </div>`;
             }
             return '';
           })()}
@@ -251,7 +254,7 @@ function renderRecipeCard() {
 
           <div class="meal-engine-actions" style="display:flex; justify-content:space-between; gap:8px;">
             <button class="btn btn-secondary" onclick="prevCard()" ${isFirst?'disabled':''}><i class="fa-solid fa-arrow-left"></i> Prev</button>
-            <button class="btn btn-success" onclick="acceptRecipe('${recipe.name.replace(/'/g,"\\'")}')"><i class="fa-solid fa-check"></i> Accept</button>
+            <button class="btn btn-success" onclick="acceptRecipe('${recipe.name.replace(/'/g,"\\'")}')">Accept</button>
             <button class="btn btn-secondary" onclick="nextCard()" ${isLast?'disabled':''}>Next <i class="fa-solid fa-arrow-right"></i></button>
           </div>
         </div>
