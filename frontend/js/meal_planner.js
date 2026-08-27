@@ -249,7 +249,7 @@ function renderRecipeCard() {
             <span class="cost-highlight" title="Rough AI Estimate">Est. RM ${parseFloat(recipe.est_cost_rm||0).toFixed(2)}</span>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 2fr 1fr;gap:8px;">
+          <div class="meal-engine-actions" style="display:flex; justify-content:space-between; gap:8px;">
             <button class="btn btn-secondary" onclick="prevCard()" ${isFirst?'disabled':''}><i class="fa-solid fa-arrow-left"></i> Prev</button>
             <button class="btn btn-success" onclick="acceptRecipe('${recipe.name.replace(/'/g,"\\'")}')"><i class="fa-solid fa-check"></i> Accept</button>
             <button class="btn btn-secondary" onclick="nextCard()" ${isLast?'disabled':''}>Next <i class="fa-solid fa-arrow-right"></i></button>
