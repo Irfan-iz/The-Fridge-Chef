@@ -31,7 +31,7 @@ function renderCookbook(recipes) {
       <div class="cookbook-card">
         <div class="cookbook-header" onclick="document.getElementById('recipe-${r.id}').classList.toggle('open')">
           <div>
-            <h3 style="margin:0; font-family:'Playfair Display', serif; font-size:1.2rem; color:var(--text-primary);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; vertical-align:text-bottom;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg> ${r.recipe_name}</h3>
+            <h3 class="cookbook-title" style="margin:0; font-family:'Playfair Display', serif; color:var(--text-primary); line-height: 1.3; margin-bottom: 4px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px; vertical-align:text-bottom;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg> ${r.recipe_name}</h3>
             <span style="font-size:0.8rem; color:var(--text-muted);">Click to view details</span>
           </div>
           <button class="btn btn-secondary btn-sm" style="color:var(--danger); border-color:var(--danger-soft); width: auto;" onclick="event.stopPropagation(); deleteRecipe(${r.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:text-bottom;"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg> Delete</button>
@@ -39,14 +39,14 @@ function renderCookbook(recipes) {
 
         <div class="cookbook-body" id="recipe-${r.id}">
           
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; margin-bottom:12px; gap: 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; margin-bottom:12px; gap: 8px;">
             <h4 style="margin:0; color:var(--text-primary); display:flex; align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"></path></svg> Ingredients</h4>
             <button class="btn btn-primary btn-sm" style="width: auto; padding: 6px 12px; flex-shrink: 0;" onclick="addRecipeToQuickList('${r.recipe_name.replace(/'/g,"\\'")}', ${JSON.stringify(ings).replace(/"/g,'&quot;')})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px; vertical-align:text-bottom;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Add All</button>
           </div>
 
           <div style="background:var(--bg-card); border-radius:var(--radius-sm); border:1px solid var(--border); margin-bottom:20px; overflow: hidden;">
             ${ings.length > 0 ? ings.map(i => `
-              <div style="display:flex; justify-content:space-between; padding:10px 14px; border-bottom:1px solid var(--border); transition: background 0.2s;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
+              <div class="cookbook-ing-row" style="display:flex; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--border); transition: background 0.2s; align-items: center;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">
                 <span style="font-size:0.95rem; font-weight:500;">${i.item || i}</span>
                 <span style="font-size:0.9rem; color:var(--text-muted); font-weight:600;">RM ${parseFloat(i.cost||0).toFixed(2)}</span>
               </div>

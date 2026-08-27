@@ -2700,3 +2700,50 @@ details[open] > summary { color: var(--accent); margin-bottom: 8px; }
 }
 
 
+
+/* Cookbook UI Polish */
+.cookbook-title {
+  font-size: 1.15rem;
+}
+.cookbook-ing-row {
+  padding: 10px 14px;
+}
+.cookbook-step-text {
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .cookbook-header {
+    padding: 14px 12px;
+    align-items: flex-start; /* So long titles align top with Delete button */
+  }
+  .cookbook-title {
+    font-size: 1.05rem !important; /* Smaller on mobile */
+  }
+  .cookbook-header > div:first-child {
+    padding-right: 12px; /* Prevent text from hitting Delete button */
+  }
+  .cookbook-ing-row {
+    padding: 8px 12px !important;
+  }
+  .cookbook-ing-row span:first-child {
+    font-size: 0.85rem !important; /* Smaller ingredient name */
+  }
+  .cookbook-ing-row span:last-child {
+    font-size: 0.8rem !important; /* Smaller cost */
+  }
+  .cookbook-step-text {
+    font-size: 0.85rem !important;
+  }
+  .timeline-item {
+    padding-left: 24px;
+    padding-bottom: 20px;
+  }
+  .timeline-item::before {
+    width: 24px;
+    height: 24px;
+    left: -31px;
+    font-size: 0.75rem;
+  }
+}
+
