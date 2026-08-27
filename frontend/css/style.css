@@ -2607,3 +2607,75 @@ details[open] > summary { color: var(--accent); margin-bottom: 8px; }
     gap: 8px;
   }
 }
+
+/* Fix for Grid/Flex overflow pushing boundaries on mobile */
+.grid-2 > div, .grid-3 > div, .grid-4 > div {
+  min-width: 0;
+}
+.card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Extra fixes for mobile profile overflow */
+@media (max-width: 768px) {
+  #cookingStreak {
+    white-space: normal !important;
+    word-wrap: break-word;
+    text-align: right;
+    max-width: 100%;
+    line-height: 1.3;
+  }
+  .data-table th, .data-table td {
+    padding: 8px 6px !important;
+  }
+  .card {
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Responsive Data Table */
+  .data-table thead {
+    display: none;
+  }
+  .data-table, .data-table tbody, .data-table tr, .data-table td {
+    display: block;
+    width: 100%;
+  }
+  .data-table tr {
+    margin-bottom: 15px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+  }
+  .data-table td {
+    text-align: right;
+    padding-left: 45% !important;
+    position: relative;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+  }
+  .data-table td:last-child {
+    border-bottom: none;
+  }
+  .data-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 14px;
+    width: 40%;
+    padding-right: 10px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .data-table td > div {
+    display: flex;
+    justify-content: flex-end; /* Align recipe name correctly */
+  }
+}

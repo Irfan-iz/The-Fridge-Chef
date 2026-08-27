@@ -194,22 +194,22 @@ async function loadProfile() {
       history.slice(0, 5).forEach(function(h) {
         const calClass = (h.calories || 0) > targets.calories ? 'cal-over' : 'cal-under';
         rows += '<tr style="transition:background 0.2s;" onmouseover="this.style.background=\'var(--bg-secondary)\'" onmouseout="this.style.background=\'transparent\'">' +
-          '<td style="padding:12px 8px;">' +
+          '<td data-label="Recipe" style="padding:12px 8px;">' +
             '<div style="display:flex;align-items:center;">' +
               '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" style="margin-right:8px;flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>' +
               '<strong style="font-size:0.9rem;">' + h.recipe_name + '</strong>' +
             '</div>' +
           '</td>' +
-          '<td style="padding:12px 8px;" class="' + calClass + '">' + (h.calories || 0) + '</td>' +
-          '<td style="padding:12px 8px;font-weight:600;">RM ' + parseFloat(h.cost_rm || 0).toFixed(2) + '</td>' +
-          '<td style="padding:12px 8px;font-size:.78rem;color:var(--text-primary);">' + new Date(h.timestamp).toLocaleDateString() + '</td>' +
+          '<td data-label="Calories" style="padding:12px 8px;" class="' + calClass + '">' + (h.calories || 0) + '</td>' +
+          '<td data-label="Cost" style="padding:12px 8px;font-weight:600;">RM ' + parseFloat(h.cost_rm || 0).toFixed(2) + '</td>' +
+          '<td data-label="Date" style="padding:12px 8px;font-size:.78rem;color:var(--text-primary);">' + new Date(h.timestamp).toLocaleDateString() + '</td>' +
           '</tr>';
       });
       recentEl.innerHTML =
-        '<div style="overflow-x:auto; width:100%;"><table class="data-table">' +
+        '<table class="data-table">' +
         '<thead><tr><th>Recipe</th><th>Cal</th><th>Cost</th><th>Date</th></tr></thead>' +
         '<tbody>' + rows + '</tbody>' +
-        '</table></div>';
+        '</table>';
     }
 
     // --- Load Stats Box ---
@@ -452,5 +452,6 @@ let url = '/api/meal/stats/' + userId;
     console.error('Error fetching stats:', e);
   }
 }
+
 
 
