@@ -186,33 +186,38 @@ async function loadProfile() {
     }
 
     // Recent meals table
-    const recentEl = document.getElementById('recentMeals');
-    if (!history.length) {
-      recentEl.innerHTML = '<div class="empty-state" style="padding:16px 0;"><p>No meals logged yet.</p></div>';
-    } else {
-      let rows = '';
-      history.slice(0, 5).forEach(function(h) {
-        const calClass = (h.calories || 0) > targets.calories ? 'cal-over' : 'cal-under';
-        rows += '<tr style="transition:background 0.2s;" onmouseover="this.style.background=\'var(--bg-secondary)\'" onmouseout="this.style.background=\'transparent\'">' +
-          '<td data-label="Recipe" style="padding:12px 8px;">' +
-            '<div style="display:flex;align-items:center;">' +
-              '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" style="margin-right:8px;flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>' +
-              '<strong style="font-size:0.9rem;">' + h.recipe_name + '</strong>' +
-            '</div>' +
-          '</td>' +
-          '<td data-label="Calories" style="padding:12px 8px;" class="' + calClass + '">' + (h.calories || 0) + '</td>' +
-          '<td data-label="Cost" style="padding:12px 8px;font-weight:600;">RM ' + parseFloat(h.cost_rm || 0).toFixed(2) + '</td>' +
-          '<td data-label="Date" style="padding:12px 8px;font-size:.78rem;color:var(--text-primary);">' + new Date(h.timestamp).toLocaleDateString() + '</td>' +
-          '</tr>';
-      });
-      recentEl.innerHTML =
-        '<table class="data-table">' +
-        '<thead><tr><th>Recipe</th><th>Cal</th><th>Cost</th><th>Date</th></tr></thead>' +
-        '<tbody>' + rows + '</tbody>' +
-        '</table>';
-    }
+      const recentEl = document.getElementById('recentMeals');
+      if (!history.length) {
+        recentEl.innerHTML = '<div class="empty-state" style="padding:16px 0;"><p>No meals logged yet.</p></div>';
+      } else {
+        let listHTML = '<div style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">';
+        history.slice(0, 5).forEach(function(h) {
+          const calClass = (h.calories || 0) > targets.calories ? 'cal-over' : 'cal-under';
+          listHTML += `
+            <div style="background: var(--bg-secondary); border-radius: 12px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border);">
+              <div style="display: flex; align-items: center; gap: 14px; overflow: hidden; margin-right: 12px;">
+                <div style="background: rgba(235, 107, 16, 0.15); border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg>
+                </div>
+                <div style="display: flex; flex-direction: column; overflow: hidden;">
+                  <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;">${h.recipe_name}</span>
+                  <span style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">${new Date(h.timestamp).toLocaleDateString()}</span>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;">
+                <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); line-height: 1;">RM ${parseFloat(h.cost_rm || 0).toFixed(2)}</span>
+                <div class="${calClass}" style="font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 4px; padding: 3px 8px; line-height: 1;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                  ${h.calories || 0}
+                </div>
+              </div>
+            </div>`;
+        });
+        listHTML += '</div>';
+        recentEl.innerHTML = listHTML;
+      }
 
-    // --- Load Stats Box ---
+      // --- Load Stats Box ---
     loadUserStats();
   } catch (e) {
     const macroProgressEl = document.getElementById('macroProgress');
