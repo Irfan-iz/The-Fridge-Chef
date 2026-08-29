@@ -285,6 +285,7 @@ function handleUpload(event) {
 
   const preview = document.getElementById('upload-preview');
   preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
 }
 
 async function scanUpload() {
@@ -325,6 +326,7 @@ function handleGeminiPreview(event) {
 
   const preview = document.getElementById('gemini-preview');
   preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
 }
 
 async function scanGemini() {
