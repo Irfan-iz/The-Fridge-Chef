@@ -28,8 +28,18 @@ function parseItemNameAndDesc(str) {
 
 function renderQuickList(items) {
   const content = document.getElementById('quicklistContent');
+  let headerHtml = `
+    <div style="margin-bottom: 20px;">
+      <h2 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text-primary); margin: 0 0 8px 0; font-weight: 800;">Procurement Quick List</h2>
+      <p style="font-size: 0.85rem; color: var(--success); margin: 0; display: flex; align-items: flex-start; gap: 8px;">
+        <i class="fa-solid fa-circle-info" style="margin-top: 3px;"></i>
+        <span>Prices are sourced from <strong>DOSM (Department of Statistics Malaysia)</strong>. The estimated retail prices are based on their respective standard packaging or weight (e.g. per 1kg, per 10pcs, etc).</span>
+      </p>
+    </div>
+  `;
+
   if (items.length === 0) {
-    content.innerHTML = `<div class="empty-state"><div class="empty-icon" style="margin-bottom:12px;"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div><p>Your grocery list is empty.</p></div>`;
+    content.innerHTML = headerHtml + `<div class="empty-state" style="margin-top: 32px;"><div class="empty-icon" style="margin-bottom:12px;"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg></div><p>Your grocery list is empty.</p></div>`;
     return;
   }
 
@@ -41,15 +51,7 @@ function renderQuickList(items) {
     grouped[recipe].push(item);
   });
 
-  let html = `
-    <div style="margin-bottom: 20px;">
-      <h2 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text-primary); margin: 0 0 8px 0; font-weight: 800;">Procurement Quick List</h2>
-      <p style="font-size: 0.85rem; color: var(--success); margin: 0; display: flex; align-items: flex-start; gap: 8px;">
-        <i class="fa-solid fa-circle-info" style="margin-top: 3px;"></i>
-        <span>Prices are sourced from <strong>DOSM (Department of Statistics Malaysia)</strong>. The estimated retail prices are based on their respective standard packaging or weight (e.g. per 1kg, per 10pcs, etc).</span>
-      </p>
-    </div>
-  `;
+  let html = headerHtml;
   
   for (const [recipeName, recipeItems] of Object.entries(grouped)) {
     const safeId = recipeName.replace(/[^a-zA-Z0-9]/g, '-');
