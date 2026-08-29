@@ -249,7 +249,7 @@ function capturePhoto() {
 
 async function scanCamera() {
   if (!capturedBlob) return showToast('No photo captured.', 'error');
-  showLoading('Analyzing photo with TensorFlow Lite...');
+  showLoading('Analyzing photo... please wait');
 
   try {
     const form = new FormData();
@@ -290,7 +290,7 @@ function handleUpload(event) {
 
 async function scanUpload() {
   if (!uploadBlob) return showToast('No image selected.', 'error');
-  showLoading('Analyzing image with TensorFlow Lite...');
+  showLoading('Analyzing photo... please wait');
 
   try {
     const form = new FormData();
@@ -331,7 +331,7 @@ function handleGeminiPreview(event) {
 
 async function scanGemini() {
   if (!geminiBlob) return showToast('No image selected.', 'error');
-  showLoading('Scanning with Gemini Vision AI...');
+  showLoading('Scanning... this may take a moment');
 
   try {
     const form = new FormData();
@@ -400,13 +400,17 @@ function addAllGeminiItems() {
 }
 
 // ---- MANUAL ADD ----
+function quickAddManual(name) {
+  addToFridge(name, null);
+}
+
 async function addManual() {
   const input = document.getElementById('manualInput');
   if (!input) return;
   const name = input.value.trim();
   if (!name) return showToast('Please type an ingredient name.', 'error');
 
-  const addBtn = document.querySelector('#addManualView button.btn-primary');
+  const addBtn = document.querySelector('#addManualView button.react-submit-btn');
   if (addBtn) {
     addBtn.disabled = true;
     addBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Checking...';

@@ -55,7 +55,7 @@ function switchEngineMode(mode) {
         <div class="card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:400px; text-align:center; color:var(--text-muted);">
           <div style="margin-bottom:24px; position:relative;">
             <div style="position:absolute; inset:-20px; background:radial-gradient(circle, var(--accent) 0%, transparent 70%); opacity:0.1; border-radius:50%; filter:blur(10px);"></div>
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.9; position:relative; z-index:2; filter: drop-shadow(0 0 8px rgba(200,75,49,0.3));"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.9; position:relative; z-index:2; filter: drop-shadow(0 0 8px rgba(200,75,49,0.3));"><rect x="3" y="4" width="16" height="16" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           </div>
           <p style="font-size:1.1rem; font-weight:700; color:var(--text-primary); letter-spacing:0.5px;">Multi-Day Meal Planner (${days} Days).</p>
           <p style="font-size:0.9rem; max-width:300px; margin-top:12px; line-height:1.5; color:var(--text-muted);">Select your plan duration (1 to 7 days), state pricing origin, and click "Generate Multi-Day Plan".</p>
@@ -338,26 +338,34 @@ function renderMealPlan(data) {
         const meal = meals[mealType];
         if (meal && meal.name && meal.name.trim() !== '' && meal.name !== 'Empty Meal Slot') {
           html += `
-                        <div class="planner-meal-row card-style-row" style="flex-direction: column; align-items: stretch; gap: 8px; padding: 12px;">
-              <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
-                <span class="planner-meal-badge ${mealType}">${mealLabels[mealType]}</span>
-                <div style="display:flex; align-items:center; gap:5px;">
-                  <button class="btn btn-ghost btn-sm" onclick="openEditDayModalWithMeal(${idx}, '${mealType}', 'generator')" title="Edit Meal" style="font-size:0.7rem; padding:3px 7px; border:1px solid var(--border); border-radius:5px; color:var(--text-primary);">
-                    <i class="fa-solid fa-pen"></i>
-                  </button>
-                  <button class="btn btn-ghost btn-sm" onclick="clearMealSlot(${idx}, '${mealType}', 'generator')" title="Clear this meal slot" style="font-size:0.7rem; padding:3px 6px; color:var(--danger);">
-                    <i class="fa-solid fa-xmark"></i>
-                  </button>
-                </div>
+                        <div class="planner-meal-row custom-meal-card" style="display:flex;">
+              <div style="display:flex; align-items:center; width:100%;">
+                <span class="planner-meal-badge ${mealType}" style="padding: 4px 10px; font-weight: 700;">${mealLabels[mealType]}</span>
               </div>
-              <div class="meal-name-text" style="font-weight:700; font-size:0.95rem; color:var(--text-primary); font-style:italic; line-height:1.3;">
+              
+              <div class="meal-name-text" style="font-weight:700; font-size:1.05rem; color:var(--text-primary); font-family: 'Playfair Display', serif; font-style:italic; line-height:1.3;">
                 ${escapeHtmlMP(meal.name)}
               </div>
-              <div class="meal-stats-text" style="font-size:0.75rem; color:var(--text-muted); display:flex; flex-wrap:wrap; gap:6px 12px;">
-                <span><i class="fa-regular fa-clock"></i> ${meal.prep_time || 20}m</span>
-                <span><i class="fa-solid fa-fire"></i> ${meal.calories || 0} kcal</span>
-                <span><i class="fa-solid fa-sack-dollar"></i> RM ${parseFloat(meal.est_cost_rm || 0).toFixed(2)}</span>
-                ${meal.protein_g ? `<span><i class="fa-solid fa-drumstick-bite"></i> ${meal.protein_g}g pro</span>` : ''}
+              
+              <div class="meal-stats-text hide-scrollbar" style="font-size:0.8rem; color:var(--text-muted); display:flex; gap:12px; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; padding-bottom: 2px;">
+                <span style="display:inline-flex; align-items:center; gap:4px;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${meal.prep_time || 20}m</span>
+                <span style="display:inline-flex; align-items:center; gap:4px;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> ${meal.calories || 0} kcal</span>
+                <span style="display:inline-flex; align-items:center; gap:4px;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> RM ${parseFloat(meal.est_cost_rm || 0).toFixed(2)}</span>
+                ${meal.protein_g ? `<span style="display:inline-flex; align-items:center; gap:4px;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.8 14.2 4.4-4.4"/><path d="m16.7 5.8-2.5 2.5"/><path d="m7.3 15.3-2.5 2.5"/><path d="m12.7 2.3 9 9"/><path d="m2.3 12.7 9 9"/><path d="m21.5 8-5.5-5.5"/><path d="m8 21.5-5.5-5.5"/></svg> ${meal.protein_g}g pro</span>` : ''}
+              </div>
+              
+              <hr style="margin: 4px 0; border: none; border-top: 1px solid rgba(0,0,0,0.06);" />
+              
+              <div style="display:flex; align-items:center; gap:8px; width:100%;">
+                <button class="btn btn-primary" onclick="event.stopPropagation(); logMealForToday(${idx}, '${mealType}', 'active')" title="Eat this meal today" style="flex:1; display:flex; justify-content:center; align-items:center; gap:6px; font-size:0.85rem; padding:8px; border-radius:6px; font-weight:700;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg> Eat
+                </button>
+                <button class="btn btn-ghost" onclick="event.stopPropagation(); openEditDayModalWithMeal(${idx}, '${mealType}', 'active')" title="Edit Meal" style="width: 32px; height: 32px; display:flex; justify-content:center; align-items:center; padding:0; border:1px solid rgba(0,0,0,0.1); border-radius:6px; color:var(--text-muted); background:var(--bg-card);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                </button>
+                <button class="btn btn-ghost" onclick="clearMealSlot(${idx}, '${mealType}', 'active')" title="Clear this meal slot" style="width: 32px; height: 32px; display:flex; justify-content:center; align-items:center; padding:0; border:1px solid rgba(0,0,0,0.1); border-radius:6px; color:var(--text-muted); background:var(--bg-card);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
               </div>
             </div>`;
         } else {
@@ -698,16 +706,24 @@ function renderActiveWeeklySchedule() {
         </div>
         <h3 style="margin:4px 0 0; font-family:'Playfair Display',serif; font-size:1.35rem; color:var(--text-primary);">${escapeHtmlMP(plan.plan_name || 'My Meal Plan')}</h3>
       </div>
-      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <div style="display:flex; gap:8px; font-size:0.85rem; font-weight:700;">
-          <span style="background:var(--bg-secondary); padding:6px 12px; border-radius:8px; border:1px solid var(--border);"><i class="fa-solid fa-fire"></i> ${calculateTotalCalories(days)} kcal</span>
-          <span style="background:var(--bg-secondary); padding:6px 12px; border-radius:8px; border:1px solid var(--border);"><i class="fa-solid fa-sack-dollar"></i> RM ${parseFloat(calculateTotalCost(days)).toFixed(2)}</span>
+      <div style="display:flex; flex-direction:column; gap:12px; margin-top:16px; width:100%;">
+        <div style="display:flex; gap:8px; width:100%;">
+          <div class="plan-stat-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+            ${calculateTotalCalories(days)} kcal
+          </div>
+          <div class="plan-stat-badge">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+            RM ${parseFloat(calculateTotalCost(days)).toFixed(2)}
+          </div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="saveActivePlanToSavedList()" style="border-radius:8px; font-weight:700; padding:7px 14px;">
-          <i class="fa-solid fa-floppy-disk"></i> Save Plan
+        <button class="plan-action-btn plan-btn-save" onclick="saveActivePlanToSavedList()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save Plan
         </button>
-        <button class="btn btn-secondary btn-sm" onclick="openCreatePlanModal()" style="border-radius:8px; font-weight:700; padding:7px 12px;">
-          <i class="fa-solid fa-plus"></i> New Plan
+        <button class="plan-action-btn plan-btn-new" onclick="openCreatePlanModal()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+          New Plan
         </button>
       </div>
     </div>
@@ -767,29 +783,34 @@ function renderActiveWeeklySchedule() {
         const meal = meals[mealType];
         if (meal && meal.name && meal.name.trim() !== '' && meal.name !== 'Empty Meal Slot') {
           html += `
-                        <div class="planner-meal-row card-style-row" style="flex-direction: column; align-items: stretch; gap: 8px; padding: 12px;">
-              <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
-                <span class="planner-meal-badge ${mealType}">${mealLabels[mealType]}</span>
-                <div style="display:flex; align-items:center; gap:5px;">
-                  <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); logMealForToday(${idx}, '${mealType}', 'active')" title="Eat this meal today (Logs to Analytics)" style="font-size:0.75rem; padding:4px 10px; border-radius:6px; font-weight:700;">
-                    <i class="fa-solid fa-utensils"></i> Eat
-                  </button>
-                  <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); openEditDayModalWithMeal(${idx}, '${mealType}', 'active')" title="Edit Meal" style="font-size:0.7rem; padding:3px 7px; border:1px solid var(--border); border-radius:5px; color:var(--text-primary);">
-                    <i class="fa-solid fa-pen"></i>
-                  </button>
-                  <button class="btn btn-ghost btn-sm" onclick="clearMealSlot(${idx}, '${mealType}', 'active')" title="Clear this meal slot" style="font-size:0.7rem; padding:3px 6px; color:var(--danger);">
-                    <i class="fa-solid fa-xmark"></i>
-                  </button>
-                </div>
+                        <div class="planner-meal-row custom-meal-card" style="display:flex;">
+              <div style="display:flex; align-items:center; width:100%;">
+                <span class="planner-meal-badge ${mealType}" style="padding: 4px 10px; font-weight: 700;">${mealLabels[mealType]}</span>
               </div>
-              <div class="meal-name-text" style="font-weight:700; font-size:0.95rem; color:var(--text-primary); font-style:italic; line-height:1.3;">
+              
+              <div class="meal-name-text" style="font-weight:700; font-size:1.05rem; color:var(--text-primary); font-family: 'Playfair Display', serif; font-style:italic; line-height:1.3;">
                 ${escapeHtmlMP(meal.name)}
               </div>
-              <div class="meal-stats-text" style="font-size:0.75rem; color:var(--text-muted); display:flex; flex-wrap:wrap; gap:6px 12px;">
-                <span><i class="fa-regular fa-clock"></i> ${meal.prep_time || 20}m</span>
-                <span><i class="fa-solid fa-fire"></i> ${meal.calories || 0} kcal</span>
-                <span><i class="fa-solid fa-sack-dollar"></i> RM ${parseFloat(meal.est_cost_rm || 0).toFixed(2)}</span>
-                ${meal.protein_g ? `<span><i class="fa-solid fa-drumstick-bite"></i> ${meal.protein_g}g pro</span>` : ''}
+              
+              <div class="meal-stats-text hide-scrollbar" style="font-size:0.8rem; color:var(--text-muted); display:flex; gap:12px; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; padding-bottom: 2px;">
+                <span style="display:inline-flex; align-items:center; gap:4px;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${meal.prep_time || 20}m</span>
+                <span style="display:inline-flex; align-items:center; gap:4px;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg> ${meal.calories || 0} kcal</span>
+                <span style="display:inline-flex; align-items:center; gap:4px;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> RM ${parseFloat(meal.est_cost_rm || 0).toFixed(2)}</span>
+                ${meal.protein_g ? `<span style="display:inline-flex; align-items:center; gap:4px;"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.8 14.2 4.4-4.4"/><path d="m16.7 5.8-2.5 2.5"/><path d="m7.3 15.3-2.5 2.5"/><path d="m12.7 2.3 9 9"/><path d="m2.3 12.7 9 9"/><path d="m21.5 8-5.5-5.5"/><path d="m8 21.5-5.5-5.5"/></svg> ${meal.protein_g}g pro</span>` : ''}
+              </div>
+              
+              <hr style="margin: 4px 0; border: none; border-top: 1px solid rgba(0,0,0,0.06);" />
+              
+              <div style="display:flex; align-items:center; gap:8px; width:100%;">
+                <button class="btn btn-primary" onclick="event.stopPropagation(); logMealForToday(${idx}, '${mealType}', 'active')" title="Eat this meal today" style="flex:1; display:flex; justify-content:center; align-items:center; gap:6px; font-size:0.85rem; padding:8px; border-radius:6px; font-weight:700;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg> Eat
+                </button>
+                <button class="btn btn-ghost" onclick="event.stopPropagation(); openEditDayModalWithMeal(${idx}, '${mealType}', 'active')" title="Edit Meal" style="width: 32px; height: 32px; display:flex; justify-content:center; align-items:center; padding:0; border:1px solid rgba(0,0,0,0.1); border-radius:6px; color:var(--text-muted); background:var(--bg-card);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+                </button>
+                <button class="btn btn-ghost" onclick="clearMealSlot(${idx}, '${mealType}', 'active')" title="Clear this meal slot" style="width: 32px; height: 32px; display:flex; justify-content:center; align-items:center; padding:0; border:1px solid rgba(0,0,0,0.1); border-radius:6px; color:var(--text-muted); background:var(--bg-card);">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
               </div>
             </div>`;
         } else {

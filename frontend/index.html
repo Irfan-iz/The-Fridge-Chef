@@ -469,6 +469,7 @@
         sessionStorage.setItem('access_token', data.access_token);
       }
       sessionStorage.setItem('user', JSON.stringify(data));
+      sessionStorage.setItem('showWelcome', 'true');
       window.location.href = data.is_admin ? '/admin' : '/dashboard';
     } catch(e) { 
       showAlert('Cannot connect to server. Check FastAPI backend.'); 
