@@ -101,22 +101,21 @@ function renderQuickList(items) {
             <button class="btn btn-secondary" onclick="addSingleItem('${recipeName.replace(/'/g,"\\'")}', '${safeId}')" style="border-radius: 8px; font-weight: 700; padding: 0 16px; font-size: 0.9rem; border-color: rgba(0,0,0,0.15); background: var(--bg-secondary); color: var(--text-primary);"><i class="fa-solid fa-plus" style="margin-right: 6px;"></i> Add</button>
           </div>
         </div>
+        
+        <div style="padding: 20px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.5px;">EST. REMAINING</span>
+            <span style="font-size: 1.5rem; font-weight: 900; color: var(--text-primary); line-height: 1; margin-top: 6px;"><span style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted); margin-right: 4px;">RM</span><span class="est-remaining-total" id="estRemainingTotal-${safeId}">0.00</span></span>
+          </div>
+          <button class="btn" onclick="exportToWhatsApp('${safeId}', '${recipeName.replace(/'/g,"\\'")}')" style="background: #25D366; color: white; font-weight: 700; border-radius: 8px; padding: 10px 16px; font-size: 0.9rem; border: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); transition: transform 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> WhatsApp Export
+          </button>
+        </div>
       </div>
     `;
   }
 
-  // Footer for calculation and export
-  html += `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; margin-bottom: 32px; padding: 0 4px;">
-      <div style="display: flex; flex-direction: column;">
-        <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.5px;">EST. REMAINING</span>
-        <span style="font-size: 1.7rem; font-weight: 900; color: var(--text-primary); line-height: 1; margin-top: 6px;"><span style="font-size: 1.1rem; font-weight: 700; color: var(--text-muted); margin-right: 4px;">RM</span><span id="estRemainingTotal">0.00</span></span>
-      </div>
-      <button class="btn" onclick="exportToWhatsApp()" style="background: #25D366; color: white; font-weight: 700; border-radius: 8px; padding: 12px 20px; font-size: 0.95rem; border: none; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); transition: transform 0.2s;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> WhatsApp Export
-      </button>
-    </div>
-  `;
+
 
   content.innerHTML = html;
   recalculateTotal();
@@ -173,20 +172,19 @@ function toggleBought(id) {
 }
 
 function recalculateTotal() {
-  const rows = document.querySelectorAll('.shop-item-row');
-  let total = 0;
-  
-  rows.forEach(row => {
-    if (!row.classList.contains('is-bought')) {
-      const price = parseFloat(row.getAttribute('data-price')) || 0;
-      total += price;
-    }
+  const groups = document.querySelectorAll('.cookbook-card');
+  groups.forEach(group => {
+    const rows = group.querySelectorAll('.shop-item-row');
+    let total = 0;
+    rows.forEach(row => {
+      if (!row.classList.contains('is-bought')) {
+        const price = parseFloat(row.getAttribute('data-price')) || 0;
+        total += price;
+      }
+    });
+    const totalEl = group.querySelector('.est-remaining-total');
+    if (totalEl) totalEl.textContent = total.toFixed(2);
   });
-  
-  const totalEl = document.getElementById('estRemainingTotal');
-  if (totalEl) {
-    totalEl.textContent = total.toFixed(2);
-  }
 }
 
 function exportToWhatsApp() {
