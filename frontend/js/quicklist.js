@@ -87,7 +87,7 @@ function renderQuickList(items) {
               </div>
               
               <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0; margin-left: 12px;">
-                ${item.dosm_price > 0 ? `<span style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);" class="item-price-text"><span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-right: 2px;">RM</span>${item.dosm_price.toFixed(2)} <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">/${(item.dosm_price_label || \'per unit\').replace(\'per \', \'\')}</span></span>` : \'\'}
+                ${item.dosm_price > 0 ? `<span style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);" class="item-price-text"><span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-right: 2px;">RM</span>${item.dosm_price.toFixed(2)} <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">/${(item.dosm_price_label || 'per unit').replace('per ', '')}</span></span>` : ''}
                 <button class="btn btn-ghost btn-sm" onclick="deleteShoppingItem(${item.id})" style="color:var(--text-muted); font-size:1.1rem; padding: 0; width: 24px; height: 24px; display:flex; justify-content:center; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
               </div>
             </div>
