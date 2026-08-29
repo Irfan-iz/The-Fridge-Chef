@@ -323,6 +323,31 @@ def load_price_database():
 # ==========================================
 # PUBLIC FUNCTIONS
 # ==========================================
+def get_price_with_unit(item_name_english: str):
+    db    = load_price_database()
+    query = item_name_english.lower().strip()
+
+    # 1. Keyword map
+    for keyword, codes in KEYWORD_MAP.items():
+        if keyword in query or query in keyword:
+            for code in codes:
+                if code in db:
+                    return {"price": db[code]['price_median'], "unit": db[code]['unit']}
+
+    # 2. Fallback hardcoded prices
+    for keyword, price in FALLBACK_PRICES.items():
+        if keyword in query:
+            return {"price": price, "unit": "unit"}
+
+    # 3. English name fuzzy match
+    for code, info in db.items():
+        eng = info['name_english'].lower()
+        if eng and (query == eng or query in eng or eng in query):
+            return {"price": info['price_median'], "unit": info['unit']}
+            
+    return {"price": None, "unit": None}
+
+
 def get_price(item_name_english: str):
     """
     Look up retail price by English ingredient name.

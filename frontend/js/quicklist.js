@@ -41,7 +41,15 @@ function renderQuickList(items) {
     grouped[recipe].push(item);
   });
 
-  let html = '';
+  let html = `
+    <div style="margin-bottom: 20px;">
+      <h2 style="font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--text-primary); margin: 0 0 8px 0; font-weight: 800;">Procurement Quick List</h2>
+      <p style="font-size: 0.85rem; color: var(--success); margin: 0; display: flex; align-items: flex-start; gap: 8px;">
+        <i class="fa-solid fa-circle-info" style="margin-top: 3px;"></i>
+        <span>Prices are sourced from <strong>DOSM (Department of Statistics Malaysia)</strong>. The estimated retail prices are based on their respective standard packaging or weight (e.g. per 1kg, per 10pcs, etc).</span>
+      </p>
+    </div>
+  `;
   
   for (const [recipeName, recipeItems] of Object.entries(grouped)) {
     const safeId = recipeName.replace(/[^a-zA-Z0-9]/g, '-');
@@ -77,7 +85,7 @@ function renderQuickList(items) {
               </div>
               
               <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0; margin-left: 12px;">
-                ${item.dosm_price > 0 ? `<span style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);" class="item-price-text"><span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-right: 2px;">RM</span>${item.dosm_price.toFixed(2)}</span>` : ''}
+                ${item.dosm_price > 0 ? `<span style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);" class="item-price-text"><span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-right: 2px;">RM</span>${item.dosm_price.toFixed(2)} <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">/${(item.dosm_price_label || \'per unit\').replace(\'per \', \'\')}</span></span>` : \'\'}
                 <button class="btn btn-ghost btn-sm" onclick="deleteShoppingItem(${item.id})" style="color:var(--text-muted); font-size:1.1rem; padding: 0; width: 24px; height: 24px; display:flex; justify-content:center; align-items:center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
               </div>
             </div>
@@ -207,7 +215,8 @@ function exportToWhatsApp() {
       }
       
       if (item.dosm_price > 0) {
-        itemLine += isBought ? ` ~RM${item.dosm_price.toFixed(2)}~` : ` RM${item.dosm_price.toFixed(2)}`;
+        let unit_lbl = (item.dosm_price_label || 'per unit').replace('per ', '');
+        itemLine += isBought ? ` ~RM${item.dosm_price.toFixed(2)}/${unit_lbl}~` : ` RM${item.dosm_price.toFixed(2)}/${unit_lbl}`;
       }
       
       if (!isBought && item.dosm_price > 0) {
