@@ -232,12 +232,14 @@ function renderMacroBar(label, current, target, unit, customColor, goal = '') {
   const pct = target > 0 ? Math.min(Math.round((current / target) * 100), 100) : 0;
   let color = customColor || 'var(--accent)';
   let statusIcon = '';
+  let overageText = '';
   
   if (label === 'Calories') {
     if (goal.includes('Loss') || goal.includes('Deficit')) {
       if (current > target) {
         color = 'var(--danger)';
         statusIcon = ' <i class="fa-solid fa-circle-exclamation" style="color:var(--danger); margin-left:4px;" title="Exceeded Limit!"></i>';
+        overageText = `<span style="color:var(--danger); font-size:0.75rem; margin-left:6px;">(Over limit)</span>`;
       } else if (current >= target * 0.9 && current <= target) {
         color = 'var(--success)';
         statusIcon = ' <i class="fa-solid fa-circle-check" style="color:var(--success); margin-left:4px;" title="On Target!"></i>';
@@ -246,11 +248,13 @@ function renderMacroBar(label, current, target, unit, customColor, goal = '') {
       if (current >= target) {
         color = 'var(--success)';
         statusIcon = ' <i class="fa-solid fa-circle-check" style="color:var(--success); margin-left:4px;" title="Goal Reached!"></i>';
+        overageText = `<span style="color:var(--success); font-size:0.75rem; font-weight:700; margin-left:6px;">(Goal Reached)</span>`;
       }
     } else { // Maintain
       if (current > target * 1.05) {
         color = 'var(--danger)';
         statusIcon = ' <i class="fa-solid fa-circle-exclamation" style="color:var(--danger); margin-left:4px;" title="Exceeded Limit!"></i>';
+        overageText = `<span style="color:var(--danger); font-size:0.75rem; margin-left:6px;">(Over limit)</span>`;
       } else if (current >= target * 0.95 && current <= target * 1.05) {
         color = 'var(--success)';
         statusIcon = ' <i class="fa-solid fa-circle-check" style="color:var(--success); margin-left:4px;" title="On Target!"></i>';
@@ -258,14 +262,30 @@ function renderMacroBar(label, current, target, unit, customColor, goal = '') {
     }
   } else {
     // Macros logic
-    if (current > target * 1.1) {
-      color = 'var(--danger)';
-    } else if (current >= target * 0.85) {
-      color = 'var(--success)';
+    if (goal.includes('Gain') || goal.includes('Surplus')) {
+        // For Gain, going over protein/carbs/fat isn't strictly penalized
+        if (current >= target) {
+            color = 'var(--success)';
+            if (current > target * 1.5) { 
+                // Maybe if they go way over, but let's just make it success for now
+            }
+        }
+    } else if (goal.includes('Loss') || goal.includes('Deficit')) {
+        if (current > target * 1.1) {
+            color = 'var(--danger)';
+            overageText = `<span style="color:var(--danger); font-size:0.75rem; margin-left:6px;">(Over limit)</span>`;
+        } else if (current >= target * 0.85) {
+            color = 'var(--success)';
+        }
+    } else { // Maintain
+        if (current > target * 1.1) {
+            color = 'var(--danger)';
+            overageText = `<span style="color:var(--danger); font-size:0.75rem; margin-left:6px;">(Over limit)</span>`;
+        } else if (current >= target * 0.85) {
+            color = 'var(--success)';
+        }
     }
   }
-
-  const overageText = current > target ? `<span style="color:var(--danger); font-size:0.75rem; margin-left:6px;">(Over limit)</span>` : '';
 
   return '<div style="margin-bottom:16px;">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;font-size:.85rem;margin-bottom:6px;">' +
