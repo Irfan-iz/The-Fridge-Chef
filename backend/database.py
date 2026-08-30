@@ -138,8 +138,8 @@ def update_user_profile(username, phone_number, age, gender, height, weight, act
 
 def log_meal(user_id, recipe_name, calories, protein, carbs, fat, cost_rm):
     conn = get_connection()
-    conn.execute('''INSERT INTO History (user_id, recipe_name, calories, protein, carbs, fat, cost_rm)
-        VALUES (?, ?, ?, ?, ?, ?, ?)''', (user_id, recipe_name, calories, protein, carbs, fat, cost_rm))
+    conn.execute('''INSERT INTO History (user_id, recipe_name, calories, protein, carbs, fat, cost_rm, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now', '+8 hours'))''', (user_id, recipe_name, calories, protein, carbs, fat, cost_rm))
     conn.commit()
     conn.close()
 
@@ -242,7 +242,7 @@ def get_stats():
     total_meals = conn.execute("SELECT COUNT(*) as c FROM History").fetchone()["c"]
     total_savings = conn.execute("SELECT ROUND(SUM(cost_rm),2) as s FROM History").fetchone()["s"] or 0
     meals_today = conn.execute(
-        "SELECT COUNT(*) as c FROM History WHERE DATE(timestamp)=DATE('now')"
+        "SELECT COUNT(*) as c FROM History WHERE DATE(timestamp)=DATE('now', '+8 hours')"
     ).fetchone()["c"]
     health_dist = conn.execute(
         "SELECT health_goal, COUNT(*) as count FROM Users GROUP BY health_goal"
@@ -251,7 +251,7 @@ def get_stats():
         "SELECT recipe_name, COUNT(*) as count FROM History GROUP BY recipe_name ORDER BY count DESC LIMIT 5"
     ).fetchall()
     hourly = conn.execute(
-        "SELECT strftime('%H', datetime(timestamp, '+8 hours')) as hour, COUNT(*) as count FROM History GROUP BY hour ORDER BY hour"
+        "SELECT strftime('%H', timestamp) as hour, COUNT(*) as count FROM History GROUP BY hour ORDER BY hour"
     ).fetchall()
     conn.close()
     return {
@@ -269,8 +269,8 @@ def get_stats():
 # ==========================================
 def save_meal_plan(user_id, plan_name, plan_data, total_calories, total_cost):
     conn = get_connection()
-    conn.execute('''INSERT INTO MealPlans (user_id, plan_name, plan_data, total_calories, total_cost)
-        VALUES (?, ?, ?, ?, ?)''', (user_id, plan_name, plan_data, total_calories, total_cost))
+    conn.execute('''INSERT INTO MealPlans (user_id, plan_name, plan_data, total_calories, total_cost, created_at)
+        VALUES (?, ?, ?, ?, ?, datetime('now', '+8 hours'))''', (user_id, plan_name, plan_data, total_calories, total_cost))
     conn.commit()
     conn.close()
 

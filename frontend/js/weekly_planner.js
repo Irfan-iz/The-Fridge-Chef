@@ -628,7 +628,7 @@ async function loadSavedMealPlans() {
 
     let html = '';
     savedMealPlans.forEach(plan => {
-      const date = new Date(plan.created_at).toLocaleDateString();
+      const date = new Date(plan.created_at.replace(' ', 'T')).toLocaleDateString();
       html += `
                   <div class="saved-plan-row">
             <div>

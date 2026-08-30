@@ -15,8 +15,8 @@ function getBmiCategory(bmi) {
 
 function getCookingStreak(history) {
   if (!history.length) return 0;
-  history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-  const dates = [...new Set(history.map(h => new Date(h.timestamp).toDateString()))];
+  history.sort((a, b) => new Date(b.timestamp.replace(' ', 'T')) - new Date(a.timestamp.replace(' ', 'T')));
+  const dates = [...new Set(history.map(h => new Date(h.timestamp.replace(' ', 'T')).toDateString()))];
   let streak = 0;
   const todayDate = new Date(new Date().toDateString());
   let currentDiff = Math.round((todayDate - new Date(dates[0])) / 86400000);
@@ -156,7 +156,7 @@ async function loadProfile() {
 
     // Today macros
     const today      = new Date().toDateString();
-    const todayMeals = history.filter(h => new Date(h.timestamp).toDateString() === today);
+    const todayMeals = history.filter(h => new Date(h.timestamp.replace(' ', 'T')).toDateString() === today);
     const dailyCal   = todayMeals.reduce((s, h) => s + (h.calories || 0), 0);
     const dailyPro   = todayMeals.reduce((s, h) => s + (h.protein  || 0), 0);
     const dailyCarb  = todayMeals.reduce((s, h) => s + (h.carbs    || 0), 0);
@@ -201,7 +201,7 @@ async function loadProfile() {
                 </div>
                 <div style="display: flex; flex-direction: column; overflow: hidden;">
                   <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;">${h.recipe_name}</span>
-                  <span style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">${new Date(h.timestamp).toLocaleDateString()}</span>
+                  <span style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">${new Date(h.timestamp.replace(' ', 'T')).toLocaleDateString()}</span>
                 </div>
               </div>
               <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0;">

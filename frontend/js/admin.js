@@ -217,7 +217,7 @@ async function viewUserHistory(userId, username) {
         '<td><strong>' + h.recipe_name + '</strong></td>' +
         '<td>' + (h.calories || 0) + '</td>' +
         '<td>RM ' + parseFloat(h.cost_rm || 0).toFixed(2) + '</td>' +
-        '<td style="font-size:.75rem;color:var(--text-muted);">' + new Date(h.timestamp).toLocaleDateString() + '</td>' +
+        '<td style="font-size:.75rem;color:var(--text-muted);">' + new Date(h.timestamp.replace(' ', 'T')).toLocaleDateString() + '</td>' +
       '</tr>';
     });
     document.getElementById('historyModalBody').innerHTML =
