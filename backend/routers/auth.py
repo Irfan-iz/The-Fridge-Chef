@@ -3,8 +3,23 @@ from fastapi import APIRouter, HTTPException, Depends
 from schemas import LoginRequest, RegisterRequest, UpdateProfileRequest
 import database as db
 from security import create_access_token, get_current_user
+from ai_models import text_model
 
 router = APIRouter()
+
+
+def is_allergy_legit(allergy_str: str) -> bool:
+    s = allergy_str.strip().lower()
+    if not s or s in ["none", "nil", "n/a", "no", "nothing", "-", "na"]:
+        return True
+    
+    prompt = f'Is "{allergy_str}" a legitimate dietary allergy, food restriction, or diet (like vegan/vegetarian/halal)? Answer with exactly "YES" or "NO".'
+    try:
+        response = text_model.generate_content(prompt)
+        text = response.text.strip().upper()
+        return "YES" in text
+    except:
+        return True # Fallback if API fails
 
 def check_password_strength(password):
     if len(password) < 8: return False, "Password must be at least 8 characters."
@@ -48,6 +63,9 @@ def login(req: LoginRequest):
 
 @router.post("/api/register")
 def register(req: RegisterRequest):
+    if not is_allergy_legit(req.allergies):
+        raise HTTPException(status_code=400, detail="The allergy or dietary restriction entered does not appear to be valid. Please enter a real food allergy, or 'None'.")
+
     ok, msg = check_password_strength(req.password)
     if not ok:
         raise HTTPException(status_code=400, detail=msg)
@@ -61,6 +79,9 @@ def register(req: RegisterRequest):
 
 @router.post("/api/profile/update")
 def update_profile(req: UpdateProfileRequest, current_user: dict = Depends(get_current_user)):
+    if not is_allergy_legit(req.allergies):
+        raise HTTPException(status_code=400, detail="The allergy or dietary restriction entered does not appear to be valid. Please enter a real food allergy, or 'None'.")
+
     # Ensure users can only update their own profile
     if req.username != current_user["username"]:
         raise HTTPException(status_code=403, detail="You can only update your own profile.")
