@@ -1536,9 +1536,13 @@ async function openCookbookPickerModal(dayIdx, mealType, context = 'generator') 
   pickingCookbookTarget = { dayIdx, mealType, context };
   
   const titleEl = document.getElementById('cookbookPickerTitle');
+  const subtitleEl = document.getElementById('cookbookPickerSubtitle');
   if (titleEl) {
     const mealLabel = mealType.charAt(0).toUpperCase() + mealType.slice(1);
-    titleEl.textContent = `Select ${mealLabel} from Cookbook (Day ${dayIdx + 1})`;
+    titleEl.textContent = `Select ${mealLabel}`;
+    if (subtitleEl) {
+      subtitleEl.innerHTML = `FROM COOKBOOK &bull; DAY ${dayIdx + 1}`;
+    }
   }
 
   const container = document.getElementById('cookbookPickerListContainer');
@@ -1593,32 +1597,36 @@ function renderCookbookPickerList(recipes) {
   }
 
   container.innerHTML = recipes.map(r => {
-    let ings = [];
-    try {
-      const parsed = JSON.parse(r.ingredients || r.ingredients_json || '[]');
-      ings = parsed.map(i => typeof i === 'string' ? i : (i.item || i));
-    } catch(e) {}
-
-    const imgUrl = (typeof getRecipeImageUrl === 'function') ? getRecipeImageUrl(r.recipe_name, 'malaysian') : '';
-
-    return `
-      <div class="cookbook-picker-item" onclick="selectRecipeFromCookbookPicker(${r.id})">
-        <div style="display:flex; align-items:center; gap:12px; flex:1;">
-          ${imgUrl ? `<img src="${imgUrl}" alt="${escapeHtmlMP(r.recipe_name)}" style="width:48px; height:48px; border-radius:8px; object-fit:cover; border:1px solid var(--border);" onerror="this.style.display='none'" />` : '<div style="width:40px; height:40px; border-radius:8px; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; font-size:1.2rem;"><i class="fa-solid fa-utensils"></i></div>'}
-          <div style="flex:1;">
-            <div style="font-weight:700; font-size:0.92rem; color:var(--text-primary); margin-bottom:2px;">${escapeHtmlMP(r.recipe_name)}</div>
-            <div style="font-size:0.75rem; color:var(--text-muted); line-height:1.3;">
-              ${ings.length > 0 ? ings.slice(0, 3).join(', ') + (ings.length > 3 ? '...' : '') : 'Saved recipe'}
+      let ings = [];
+      try {
+        const parsed = JSON.parse(r.ingredients || r.ingredients_json || '[]');
+        ings = parsed.map(i => typeof i === 'string' ? i : (i.item || i));
+      } catch(e) {}
+  
+      const imgUrl = (typeof getRecipeImageUrl === 'function') ? getRecipeImageUrl(r.recipe_name, 'malaysian') : '';
+      const cals = r.calories || 450;
+  
+      return `
+        <div class="cookbook-picker-item" onclick="selectRecipeFromCookbookPicker(${r.id})" style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:0; display:flex; align-items:center; gap:16px; cursor:pointer; transition:all 0.2s; box-shadow:var(--shadow-sm);">
+          ${imgUrl ? `<img src="${imgUrl}" alt="${escapeHtmlMP(r.recipe_name)}" style="width:56px; height:56px; border-radius:8px; object-fit:cover; border:1px solid var(--border);" onerror="this.style.display='none'" />` : '<div style="width:56px; height:56px; border-radius:8px; background:rgba(0,0,0,0.04); display:flex; align-items:center; justify-content:center; font-size:1.4rem; color:var(--text-muted);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg></div>'}
+          
+          <div style="flex:1; overflow:hidden;">
+            <div style="font-weight:700; font-size:0.95rem; color:var(--text-primary); margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtmlMP(r.recipe_name)}</div>
+            <div style="font-size:0.8rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:8px;">
+              ${ings.length > 0 ? ings.join(', ') : 'Saved recipe'}
+            </div>
+            <div style="display:inline-block; background:rgba(0,0,0,0.06); color:var(--text-muted); font-size:0.65rem; font-weight:800; padding:4px 8px; border-radius:4px; letter-spacing:0.5px;">
+              ${cals} KCAL
             </div>
           </div>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <button class="btn btn-primary btn-sm" style="font-size:0.75rem; padding:5px 12px; font-weight:700; border-radius:6px;">
-            + Select
-          </button>
-        </div>
-      </div>`;
-  }).join('');
+          
+          <div style="flex-shrink:0;">
+            <button class="btn btn-sm" style="font-size:0.8rem; padding:6px 14px; font-weight:700; border-radius:8px; background:rgba(235, 107, 16, 0.08); color:var(--accent); border:1px solid rgba(235, 107, 16, 0.2); transition:all 0.2s;" onmouseover="this.style.background='var(--accent)'; this.style.color='#fff'" onmouseout="this.style.background='rgba(235, 107, 16, 0.08)'; this.style.color='var(--accent)'">
+              + Select
+            </button>
+          </div>
+        </div>`;
+    }).join('');
 }
 
 /**
