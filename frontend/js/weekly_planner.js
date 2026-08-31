@@ -1534,24 +1534,42 @@ let cachedCookbookRecipes = [];
  */
 async function openCookbookPickerModal(dayIdx, mealType, context = 'generator') {
   pickingCookbookTarget = { dayIdx, mealType, context };
+  const mealLabel = mealType.charAt(0).toUpperCase() + mealType.slice(1);
   
-  const titleEl = document.getElementById('cookbookPickerTitle');
-  const subtitleEl = document.getElementById('cookbookPickerSubtitle');
-  if (titleEl) {
-    const mealLabel = mealType.charAt(0).toUpperCase() + mealType.slice(1);
-    titleEl.textContent = `Select ${mealLabel}`;
-    if (subtitleEl) {
-      subtitleEl.innerHTML = `FROM COOKBOOK &bull; DAY ${dayIdx + 1}`;
-    }
-  }
-
-  const container = document.getElementById('cookbookPickerListContainer');
-  if (container) {
-    container.innerHTML = '<div style="text-align:center; padding:24px; color:var(--text-muted);"><i class="fa-solid fa-rotate"></i> Loading your cookbook...</div>';
-  }
-
   const modal = document.getElementById('cookbookPickerModal');
-  if (modal) modal.style.display = 'flex';
+  if (modal) {
+    // Forcefully rewrite the modal HTML to bypass dashboard.html caching and fix the search bar
+    modal.innerHTML = `
+    <div class="custom-modal-card" style="max-width:520px; border-radius:16px; padding:0; overflow:hidden; width:100%; display:flex; flex-direction:column; max-height:85vh;">
+      <div class="custom-modal-header" style="padding:20px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:flex-start;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="background:rgba(235, 107, 16, 0.15); border-radius:50%; width:44px; height:44px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <i class="fa-solid fa-book-open" style="color:var(--accent); font-size:1.1rem;"></i>
+          </div>
+          <div style="display:flex; flex-direction:column;">
+            <h3 id="cookbookPickerTitle" style="margin:0; font-size:1.15rem; font-weight:800; color:var(--text-primary); line-height:1.2; font-family:'Inter', sans-serif;">Select ${mealLabel}</h3>
+            <span id="cookbookPickerSubtitle" style="font-size:0.7rem; font-weight:700; color:var(--text-muted); letter-spacing:0.5px; margin-top:4px; text-transform:uppercase;">FROM COOKBOOK &bull; DAY ${dayIdx + 1}</span>
+          </div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="closeCookbookPickerModal()" style="font-size:1.2rem; line-height:1; padding:0; background:transparent; border:none; color:var(--text-muted);"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="custom-modal-body" style="padding:20px 24px; overflow-y:hidden; display:flex; flex-direction:column; flex:1;">
+        <div style="margin-bottom:20px; position:relative; flex-shrink:0;">
+          <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-muted); pointer-events:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></span>
+          <input type="text" id="cookbookSearchInput" class="form-input" placeholder="Search by recipe or ingredient..." oninput="filterCookbookPickerList(this.value)" style="padding-left:40px; border-radius:8px; border-color:rgba(0,0,0,0.15); width:100%; box-sizing:border-box;" />
+        </div>
+        <div id="cookbookPickerListContainer" style="overflow-y:auto; display:flex; flex-direction:column; gap:12px; padding-right:4px; flex:1; min-height:200px;">
+          <div style="text-align:center; padding:24px; color:var(--text-muted);"><i class="fa-solid fa-rotate"></i> Loading your cookbook...</div>
+        </div>
+      </div>
+      <div class="custom-modal-footer" style="padding:16px 24px; border-top:1px solid var(--border); display:flex; justify-content:flex-end;">
+        <button class="btn btn-secondary" onclick="closeCookbookPickerModal()" style="border-radius:8px; font-weight:700; padding:8px 24px;">Cancel</button>
+      </div>
+    </div>`;
+    modal.style.display = 'flex';
+  }
+  
+  const container = document.getElementById('cookbookPickerListContainer');
 
   const user = JSON.parse(sessionStorage.getItem('user') || '{}');
   if (!user.username) {
