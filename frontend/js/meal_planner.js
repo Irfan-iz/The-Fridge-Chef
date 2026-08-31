@@ -119,7 +119,7 @@ async function generateRecipeIdeas() {
   const maxPrepTime  = prepEnabled ? parseInt(document.getElementById('maxPrepTime').value) : null;
   const strictFridge = document.getElementById('strictFridgeToggle') ? document.getElementById('strictFridgeToggle').checked : false;
 
-  showLoading('Generating delicious recipe ideas with Groq AI...');
+  showLoading('Generating delicious recipe ideas, please wait a moment...');
   document.getElementById('generateBtn').disabled = true;
 
   try {
