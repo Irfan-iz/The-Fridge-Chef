@@ -44,6 +44,15 @@ def serve_dashboard():
 def serve_admin():
     return FileResponse(os.path.join(frontend_path, "pages", "admin.html"))
 
+@app.get("/privacy.html")
+def serve_privacy():
+    return FileResponse(os.path.join(frontend_path, "pages", "privacy.html"))
+
+@app.get("/terms.html")
+def serve_terms():
+    return FileResponse(os.path.join(frontend_path, "pages", "terms.html"))
+
+
 @app.get("/manifest.json")
 def serve_manifest():
     return FileResponse(os.path.join(frontend_path, "manifest.json"))
