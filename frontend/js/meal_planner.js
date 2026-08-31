@@ -206,6 +206,7 @@ function renderRecipeCard() {
             onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&auto=format&fit=crop&q=80';"
           />
           <div class="recipe-img-gradient"></div>
+            <div style="position:absolute; bottom:12px; left:16px; font-size:0.65rem; font-weight:600; color:rgba(255,255,255,0.85); z-index:2; text-shadow:0 1px 3px rgba(0,0,0,0.8);"><i class="fa-solid fa-circle-info"></i> Image is AI-generated and may not be accurate</div>
           <button class="card-save-btn" onclick="saveIdeaToCookbook()" title="Save to Cookbook"><i class="fa-solid fa-heart"></i></button>
         </div>
 
